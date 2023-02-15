@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<!-- https://en.wikipedia.org/wiki/Ulam_spiral -->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Canvas</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+      }
+      #container {
+        position: relative;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      #canvas {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+
+      }
+
+      .slider_container {
+        width: 100%;
+        position: fixed;
+        z-index: 1000;
+      }
+
+    </style>
+  </head>
+  <body onload="onLoad()">
+    
+    <div id="slider_container" class="slider_container">
+        <label for="animate">Animate</label>
+        <input type="checkbox" id="animate" checked />
+        <label for="animation_speed">Delay in ms</label>
+        <input type="text" size=5 id="animation_speed" value=1 />
+    </div>    
+
+    <div id="container">
+        <canvas id="canvas" width="500" height="500"></canvas>
+    </div>
+
+    <script>
+
+    const animation = true;
+    var animated_parameters = 0;
+
+
+    var parameters = {
+        range:      {value: 90, min: 90, max: 1440 * 1, step: 1, descr: 'Range', type: 'int', animate: false, direction: 'inc'},
+        smoother:   {value: 0.1, min: -10, max: 10, step: 0.005, descr: 'Steps', type: 'float', animate: true, direction: 'inc'},
+        a:          {value: 1, min: -100, max: 100, step: 1, descr: 'Slope', type: 'int', animate: true, direction: 'inc'},
+        b:          {value: 3, min: -50, max: 50, step: 1, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
+        r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'int', animate: true, direction: 'inc'},
+    }
+
+        
+    document.cookie = 'parameters=' + escape(JSON.stringify(parameters));
+    
+    function getCookie(name) {
+        if (document.cookie.length > 0) {
+            c_start = document.cookie.indexOf(name + '=');
+            if (c_start!=-1) {
+
+                c_start = c_start + name.length + 1;
+                c_end = document.cookie.indexOf(';', c_start);
+                
+                if (c_end == -1) {c_end = document.cookie.length;}
+                
+                return unescape(document.cookie.substring(c_start,c_end));
+
+            }
+        }
+        return "";
+    }
+
+    function onLoad() {
+
+        var cookie = getCookie('parameters');
+
+        window.parameters = JSON.parse(cookie);
+
+    }
+
+
+    function registerParameterControls(parameters) {
+
+        for (const [key, value] of Object.entries(parameters)) {
+
+            var container = document.createElement('div');
+            container.innerHTML = value.descr + ': ' +
+                '<input type="text" size=3 value="' + value.value + '" id="value_' + key + '" />' +
+                '<input id="slider_' + key + '" ' +
+                    'type="range" ' +
+                    'min="' + value.min + '" ' +
+                    'max="' + value.max + '" ' +
+                    'step="' + value.step + '" ' +
+                    'value="' + value.value + '"/>' +
+                    '<input type="checkbox" ' +'id="animate_' + key + '" />' +
+                '<input type="text" size=3 value="' + value.min + '" id="min_' + key + '" />' +
+                '<input type="text" size=3 value="' + value.max + '" id="max_' + key + '" />' +
+                '<input type="text" size=3 value="' + value.step + '" id="step_' + key + '" />';
+
+            document.getElementById('slider_container').appendChild(container);
+
+            const controls = ['slider', 'min', 'max', 'step', 'value', 'animate'];
+            for (const control of controls) {
+                let current_control = document.querySelector('#' + control + '_' + key);
+
+                if (control == 'animate') {
+
+                    current_control.onclick = function(event) {
+
+                        if (event.target.checked) {
+
+                            animated_parameters += 1;
+
+                        } else {
+
+                            animated_parameters -= 1;
+
+                        }
+
+                        startAnimation();
+
+                    }
+
+
+                } else {
+
+                    current_control.addEventListener('input', (event) => {
+
+                        let current_control_key = event.target.getAttribute('id').replace(control + '_', '');
+                        let current_control_value = document.querySelector('#' + control + '_' + current_control_key);
+                        current_control_value.value = event.target.value;
+                        parameters[current_control_key][control] = event.target.value;
+                        
+                        // the slider is the only one that only controls one parameter
+                        if (control == 'slider') {
+                            
+                            let current_control_value = document.querySelector('#value_' + current_control_key);
+                            current_control_value.value = event.target.value;
+                            parameters[current_control_key]['value'] = event.target.value;
+                            
+                            // the other values control the slider, like the max and min values
+                        } else {
+                            
+                            let current_control_value = document.querySelector('#slider_' + current_control_key);
+                            current_control_value[control] = event.target.value;
+                            
+                            
+                        }
+                        
+                        document.cookie = 'parameters' + escape(parameters);
+
+                        drawSpiral();
+
+                   })
+
+                } // curent_control != animate
+            }
+            
+        }
+
+    }
+
+    function listenToScreenSizeChanges() {
+      
+        window.addEventListener("resize", function() {
+        fitElementToScreen(document.getElementById('container'));
+        drawSpiral(parameters);
+
+      });
+
+    }
+      
+    function numberIsPrime(num) {
+        for (var i = 2; i < Math.sqrt(num); i++)
+            if (num % i === 0) return false;
+        return num !== 1;
+    }
+
+    function fitElementToScreen(element) {
+
+        var screenWidth = window.innerWidth;
+        var screenHeight = window.innerHeight;
+
+        element.style.width = screenWidth + "px";
+        element.style.height = screenHeight + "px";
+    }
+
+    function drawSpiral() {
+        
+        for (const [key, attributes] of Object.entries(parameters)) {
+
+            if (attributes.type == 'int') {
+                window[key] = parseInt(attributes.value);
+            } else if (attributes.type == 'float') {
+                window[key] = parseFloat(attributes.value)
+            }
+            
+            document.querySelector('#slider_' + key).value = attributes.value;
+            document.querySelector('#value_' + key).value = attributes.value;
+
+        }
+
+        var domCanvas = document.getElementById('canvas');
+        var domContext = domCanvas.getContext('2d');
+
+        var screenWidth = window.innerWidth;
+        var screenHeight = window.innerHeight;
+
+        // var canvas_dots = document.getElementById('canvas_dots');
+        // var canvas_lines = document.getElementById('canvas_lines');
+        // var context_dots = canvas_dots.getContext("2d");
+        // var context_lines = canvas_lines.getContext("2d");
+
+        var canvas_dots = document.createElement('canvas');
+        var canvas_lines = document.createElement('canvas');
+        var context_dots = canvas_dots.getContext('2d');
+        var context_lines = canvas_lines.getContext("2d");
+
+
+        domCanvas.width = screenWidth;
+        domCanvas.height = screenHeight;
+        canvas_lines.width = screenWidth;
+        canvas_lines.height = screenHeight;
+        canvas_dots.width = screenWidth;
+        canvas_dots.height = screenHeight;
+
+        domContext.clearRect(0, 0, screenWidth, screenHeight);
+        domCanvas.width+=0; 
+        context_lines.clearRect(0, 0, screenWidth, screenHeight);
+        context_dots.clearRect(0, 0, screenWidth, screenHeight);
+
+        context_dots.globalAlpha = 0.5;
+
+        num = 2;
+
+        var centerx = context_lines.canvas.width / 2;
+        var centery = context_lines.canvas.height / 2;
+
+        context_lines.moveTo(centerx, centery);
+        context_lines.beginPath();
+        
+        for (i = 0; i < parseInt(parameters.range.value); i++) {
+
+            document.querySelector('#slider_range').value = i;
+            document.querySelector('#value_range').value = i;
+
+            angle = smoother * i;
+            x = centerx + (a + b * angle) * Math.cos(angle);
+            y = centery + (a + b * angle) * Math.sin(angle);
+            num = num + 1;
+
+            if (numberIsPrime(num)) {
+
+                context_dots.moveTo(centerx, centery);
+                context_dots.beginPath();
+                context_dots.arc(x, y, r, 0, 2 * Math.PI);
+                context_dots.fillStyle = "#f00";
+                context_dots.strokeStyle = "#00f";
+                context_dots.fill();
+                context_dots.stroke();
+
+            }
+
+            context_lines.lineTo(x, y);
+
+        }
+
+        context_lines.strokeStyle = "#555";
+        // context_lines.fill();
+        context_lines.stroke();
+
+        domContext.drawImage(canvas_lines, 0, 0);
+        domContext.drawImage(canvas_dots, 0, 0);
+
+    }
+
+    function startAnimation() {
+        
+        if (window.animated_parameters > 0) {window.animation = true} else {window.animation = false}
+
+        if (window.animation == false) {
+            
+            if (typeof(loop) != 'undefined') {
+                
+                window.clearInterval(loop);
+
+            }
+
+        } else {
+
+            if (typeof(loop) != 'undefined') {
+                
+                window.clearInterval(loop);
+
+            }
+
+            loop = setInterval(animateDrawing, parseInt(document.querySelector('#animation_speed').value));
+
+        }
+
+        document.addEventListener('keydown', function(event) {
+
+            if (event.key == 'Escape') {
+
+                clearInterval(loop);
+
+                let animate = document.querySelector('#animate');
+                
+                animate.checked = false
+
+            }
+
+        });
+
+    }
+
+    function animateDrawing() {
+
+        for (const [key, attributes] of Object.entries(parameters)) {
+
+            if (document.querySelector('#animate_' + key).checked) {
+
+                if (parameters[key]['direction'] == 'inc') {
+                    parameters[key]['value'] = parameters[key]['value'] + parameters[key]['step'];
+                    if (parameters[key]['value'] > parameters[key]['max']) {
+                        parameters[key]['direction'] = 'dec';
+                    }
+                } else if (parameters[key]['direction'] == 'dec') {
+                    parameters[key]['value'] = parameters[key]['value'] - parameters[key]['step'];
+                    if (parameters[key]['value'] < parameters[key]['min']) {
+                        parameters[key]['direction'] = 'inc';
+                    }
+                }
+
+            }
+            
+        }
+        
+        drawSpiral(parameters);
+    }
+
+    function registerAnimationControlParameters() {
+        
+        let animate = document.querySelector('#animate');
+
+        animate.onclick = function(event) {
+
+            if (event.target.checked) {
+                
+                window.animation = true;
+
+                startAnimation();
+
+            } else {
+
+                window.animation = false;
+
+            }
+
+        }
+
+        let animation_speed = document.querySelector('#animation_speed');
+
+        animation_speed.addEventListener('input', (event) => {
+            
+            startAnimation();
+
+        });
+
+    }
+
+    registerAnimationControlParameters();
+
+    registerParameterControls(parameters);
+
+    startAnimation();
+
+    listenToScreenSizeChanges();
+
+    fitElementToScreen(document.getElementById('container'));
+
+    drawSpiral();
+
+    </script>
+</body>
