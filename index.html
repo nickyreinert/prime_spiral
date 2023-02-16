@@ -276,8 +276,8 @@
             // }
             
             // document.querySelector('#slider_' + key).defaultValue = attributes.value;
-            document.querySelector('#slider_' + key).value = parseInt(attributes.value);
-            document.querySelector('#value_' + key).value = parseInt(attributes.value);
+            document.querySelector('#slider_' + key).value = attributes.value;
+            document.querySelector('#value_' + key).value = attributes.value;
 
         }
 
@@ -323,9 +323,9 @@
 
             num = num + 1;
 
-            angle = parameters.smoother.value * i;
-            x = centerx + (parseInt(parameters.a.value) + parseInt(parameters.b.value) * angle) * Math.cos(angle);
-            y = centery + (parseInt(parameters.a.value) + parseInt(parameters.b.value) * angle) * Math.sin(angle);
+            angle = parseFloat(parameters.smoother.value) * i;
+            x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.cos(angle);
+            y = centery + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.sin(angle);
             
             if (numberIsPrime(num)) {
                 
@@ -381,12 +381,22 @@
             if (document.querySelector('#animate_' + key).checked) {
 
                 if (parameters[key]['direction'] == 'inc') {
-                    parameters[key]['value'] = parseInt(parameters[key]['value']) + parseInt(parameters[key]['step']);
+                    if (parameters[key]['type'] == 'float') {
+                        parameters[key]['value'] = parseFloat(parameters[key]['value']) + parseFloat(parameters[key]['step']);
+                    } else if (parameters[key]['type'] == 'int') {
+                        parameters[key]['value'] = parseInt(parameters[key]['value']) + parseInt(parameters[key]['step']);
+                    }
+                    
                     if (parameters[key]['value'] > parameters[key]['max']) {
                         parameters[key]['direction'] = 'dec';
                     }
                 } else if (parameters[key]['direction'] == 'dec') {
-                    parameters[key]['value'] = parseInt(parameters[key]['value']) - parseInt(parameters[key]['step']);
+                    if (parameters[key]['type'] == 'float') {
+                        parameters[key]['value'] = parseFloat(parameters[key]['value']) - parseFloat(parameters[key]['step']);
+                    } else if (parameters[key]['type'] == 'int') {
+                        parameters[key]['value'] = parseInt(parameters[key]['value']) - parseInt(parameters[key]['step']);
+                    }
+                    
                     if (parameters[key]['value'] < parameters[key]['min']) {
                         parameters[key]['direction'] = 'inc';
                     }
