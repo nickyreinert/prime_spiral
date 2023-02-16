@@ -73,7 +73,7 @@
         var parameters = {
             range:      {value: 90, min: 90, max: 1440 * 1, step: 1, descr: 'Range', type: 'int', animate: false, direction: 'inc'},
             smoother:   {value: 0.1, min: -1, max: 1, step: 0.01, descr: 'Density', type: 'float', animate: true, direction: 'inc'},
-            rotation:   {value: 0, min: -10, max: 10, step: 1, descr: 'Rotation', type: 'int', animate: true, direction: 'inc'},
+            rotation:   {value: 0, min: -90, max: 90, step: 0.1, descr: 'Rotation', type: 'float', animate: true, direction: 'inc'},
             a:          {value: 1, min: -100, max: 100, step: 1, descr: 'Slope', type: 'int', animate: true, direction: 'inc'},
             b:          {value: 3, min: -50, max: 50, step: 1, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
             r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'int', animate: true, direction: 'inc'}
@@ -335,8 +335,7 @@
 
             num = num + 1;
 
-            angle = (parseFloat(parameters.smoother.value) * i) + parseInt(parameters.rotation.value);
-            console.log(parameters.rotation.value)
+            angle = (parseFloat(parameters.smoother.value) * i) + parseFloat(parameters.rotation.value);
             x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.cos(angle);
             y = centery + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.sin(angle);
 
