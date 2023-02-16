@@ -80,7 +80,7 @@
         
     }
         
-    document.cookie = 'parameters=' + escape(JSON.stringify(parameters));
+    document.cookie = 'settings=' + escape(JSON.stringify(parameters));
     
     function getCookie(name) {
         if (document.cookie.length > 0) {
@@ -103,11 +103,13 @@
 
         settings_received = false;
 
-        let cookie = getCookie('parameters');
+        let settings = getCookie('settings');
 
         try {
 
-            parameters  = JSON.parse(unescape(cookie));
+            settings = JSON.parse(unescape(settings));
+            parameters = settings.parameters;
+            config = settings.config;
 
         } catch (e) {
 
@@ -213,7 +215,7 @@
                         }
 
                         // save everything to the cookie, for next reload
-                        document.cookie = 'parameters=' + escape(JSON.stringify(parameters));
+                        document.cookie = 'settings=' + escape(JSON.stringify(settings = {config: config, parameters: parameters}));
 
                         drawSpiral();
 
