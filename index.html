@@ -37,13 +37,13 @@
 
     </style>
   </head>
-  <body onload="onLoad()">
+  <body>
     
     <div id="slider_container" class="slider_container">
         <label for="animate">Animate</label>
         <input type="checkbox" id="animate" checked />
-        <label for="animation_speed">Delay in ms</label>
-        <input type="text" size=5 id="animation_speed" value=1 />
+        <label for="delay">Delay in ms</label>
+        <input type="text" size=5 id="delay" value=1 />
     </div>    
 
     <div id="container">
@@ -55,15 +55,30 @@
     const animation = true;
     var animated_parameters = 0;
 
+    restoreParameters();
 
-    var parameters = {
-        range:      {value: 90, min: 90, max: 1440 * 1, step: 1, descr: 'Range', type: 'int', animate: false, direction: 'inc'},
-        smoother:   {value: 0.1, min: -10, max: 10, step: 0.005, descr: 'Steps', type: 'float', animate: true, direction: 'inc'},
-        a:          {value: 1, min: -100, max: 100, step: 1, descr: 'Slope', type: 'int', animate: true, direction: 'inc'},
-        b:          {value: 3, min: -50, max: 50, step: 1, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
-        r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'int', animate: true, direction: 'inc'},
+    if (typeof(settings_received) == 'undefined' || !settings_received) {
+        
+        console.log('no parameters found');
+
+        var config = {
+            'delay': 1,
+            'show_numbers': true,
+            'show_primes': true,
+            'prime_outline_color': '#ff0000',
+            'prime_fill_color': '#ff0000',
+            'number_outline_color': '#ff0000'
+        }
+
+        var parameters = {
+            range:      {value: 90, min: 90, max: 1440 * 1, step: 1, descr: 'Range', type: 'int', animate: false, direction: 'inc'},
+            smoother:   {value: 0.1, min: -10, max: 10, step: 0.005, descr: 'Edges', type: 'float', animate: true, direction: 'inc'},
+            a:          {value: 1, min: -100, max: 100, step: 1, descr: 'Slope', type: 'int', animate: true, direction: 'inc'},
+            b:          {value: 3, min: -50, max: 50, step: 1, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
+            r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'int', animate: true, direction: 'inc'},
+        }
+        
     }
-
         
     document.cookie = 'parameters=' + escape(JSON.stringify(parameters));
     
@@ -84,11 +99,29 @@
         return "";
     }
 
-    function onLoad() {
+    function restoreParameters() {
 
-        var cookie = getCookie('parameters');
+        settings_received = false;
 
-        window.parameters = JSON.parse(cookie);
+        let cookie = getCookie('parameters');
+
+        try {
+
+            parameters  = JSON.parse(unescape(cookie));
+
+        } catch (e) {
+
+            console.log('no parameter cookie found: ' + e);
+
+            return;
+
+        }
+        
+        settings_received = true;
+
+        console.log(parameters);
+        
+        window.parameters = parameters;
 
     }
 
@@ -105,7 +138,8 @@
                     'min="' + value.min + '" ' +
                     'max="' + value.max + '" ' +
                     'step="' + value.step + '" ' +
-                    'defaultValue="' + value.value + '"/>' +
+                    'defaultValue="' + value.value + '" ' +
+                    'value="' + value.value + '"/>' +
                     '<input type="checkbox" ' +'id="animate_' + key + '" />' +
                 '<input type="text" size=3 value="' + value.min + '" id="min_' + key + '" />' +
                 '<input type="text" size=3 value="' + value.max + '" id="max_' + key + '" />' +
@@ -115,11 +149,14 @@
 
             const controls = ['slider', 'min', 'max', 'step', 'value', 'animate'];
             for (const control of controls) {
+
                 let current_control = document.querySelector('#' + control + '_' + key);
 
                 if (control == 'animate') {
 
                     current_control.onclick = function(event) {
+
+                        console.log('clicked animate');
 
                         if (event.target.checked) {
 
@@ -131,7 +168,7 @@
 
                         }
 
-                        startAnimation();
+                        controlAnimation();
 
                     }
 
@@ -140,28 +177,43 @@
 
                     current_control.addEventListener('input', (event) => {
 
-                        let current_control_key = event.target.getAttribute('id').replace(control + '_', '');
-                        let current_control_value = document.querySelector('#' + control + '_' + current_control_key);
-                        current_control_value.value = event.target.value;
-                        parameters[current_control_key][control] = event.target.value;
+                        console.log('clicked ' + event.target.id);
+
+                        // extract the parameter, setting (min, max, ...) and value
+                        let parameter_and_setting = event.target.getAttribute('id');
+                        let setting = parameter_and_setting.split('_')[0];
+                        let parameter = parameter_and_setting.split('_')[1];
+                        let value = event.target.value
                         
-                        // the slider is the only one that only controls one parameter
-                        if (control == 'slider') {
+                        console.log('setting ' + setting + ' of ' + parameter + ' to ' + value);
+
+                        // the slider is the only one that also controls the "value" 
+                        // of the current parameter
+                        if (setting == 'slider') {
+                        
+                            // set the global parameter object
+                            window.parameters[parameter]['value'] = value;
                             
-                            let current_control_value = document.querySelector('#value_' + current_control_key);
-                            current_control_value.value = event.target.value;
-                            parameters[current_control_key]['value'] = event.target.value;
-                            
-                            // the other values control the slider, like the max and min values
+                        // if not the slider, then it's the value, min, max or step value
+                        // which also impacts the slider
                         } else {
-                            
-                            let current_control_value = document.querySelector('#slider_' + current_control_key);
-                            current_control_value[control] = event.target.value;
-                            
-                            
+
+                            window.parameters[parameter][setting] = value;
+                            let slider = document.querySelector('#slider_' + parameter);
+                            slider[setting] = value;
+                            // also check if the current value outreaches the current slider range
+                            if (slider.max < slider.value) {
+                                slider.value = slider.max;
+                                window.parameters[parameter]['value'] = value;
+                            } else if (slider.min > slider.value) {
+                                slider.value = slider.min;
+                                window.parameters[parameter]['value'] = value;
+                            }
+
                         }
-                        
-                        document.cookie = 'parameters' + escape(parameters);
+
+                        // save everything to the cookie, for next reload
+                        document.cookie = 'parameters=' + escape(JSON.stringify(parameters));
 
                         drawSpiral();
 
@@ -185,9 +237,14 @@
     }
       
     function numberIsPrime(num) {
-        for (var i = 2; i < Math.sqrt(num); i++)
-            if (num % i === 0) return false;
-        return num !== 1;
+        
+        for(let i = 2, s = Math.sqrt(num); i <= s; i++) {
+
+            if (num % i  === 0) return false;
+        
+        }
+
+        return num > 1;
     }
 
     function fitElementToScreen(element) {
@@ -203,14 +260,15 @@
         
         for (const [key, attributes] of Object.entries(parameters)) {
 
-            if (attributes.type == 'int') {
-                window[key] = parseInt(attributes.value);
-            } else if (attributes.type == 'float') {
-                window[key] = parseFloat(attributes.value)
-            }
+            // if (attributes.type == 'int') {
+            //     window[key] = parseInt(attributes.value);
+            // } else if (attributes.type == 'float') {
+            //     window[key] = parseFloat(attributes.value)
+            // }
             
-            document.querySelector('#slider_' + key).value = attributes.value;
-            document.querySelector('#value_' + key).value = attributes.value;
+            // document.querySelector('#slider_' + key).defaultValue = attributes.value;
+            document.querySelector('#slider_' + key).value = parseInt(attributes.value);
+            document.querySelector('#value_' + key).value = parseInt(attributes.value);
 
         }
 
@@ -229,7 +287,6 @@
         var canvas_lines = document.createElement('canvas');
         var context_dots = canvas_dots.getContext('2d');
         var context_lines = canvas_lines.getContext("2d");
-
 
         domCanvas.width = screenWidth;
         domCanvas.height = screenHeight;
@@ -255,28 +312,28 @@
         
         for (i = 0; i < parseInt(parameters.range.value); i++) {
 
-            document.querySelector('#slider_range').value = i;
-            document.querySelector('#value_range').value = i;
-
-            angle = smoother * i;
-            x = centerx + (a + b * angle) * Math.cos(angle);
-            y = centery + (a + b * angle) * Math.sin(angle);
             num = num + 1;
 
+            angle = parameters.smoother.value * i;
+            x = centerx + (parseInt(parameters.a.value) + parseInt(parameters.b.value) * angle) * Math.cos(angle);
+            y = centery + (parseInt(parameters.a.value) + parseInt(parameters.b.value) * angle) * Math.sin(angle);
+            
             if (numberIsPrime(num)) {
-
+                
                 context_dots.moveTo(centerx, centery);
                 context_dots.beginPath();
-                context_dots.arc(x, y, r, 0, 2 * Math.PI);
+                context_dots.arc(x, y, parseInt(parameters.r.value), 0, 2 * Math.PI);
                 context_dots.fillStyle = "#f00";
+                context_lines.fillText(num, x, y);
                 context_dots.strokeStyle = "#00f";
                 context_dots.fill();
                 context_dots.stroke();
-
+                
             }
-
+            
+            context_lines.fillText(num, x + 5 , y + 5);
             context_lines.lineTo(x, y);
-
+            
         }
 
         context_lines.strokeStyle = "#555";
@@ -288,43 +345,23 @@
 
     }
 
-    function startAnimation() {
+    function controlAnimation() {
         
-        if (window.animated_parameters > 0) {window.animation = true} else {window.animation = false}
+        if (document.querySelector('#animate').checked) {window.animation = true}
 
-        if (window.animation == false) {
+        if (window.animated_parameters <= 0) {window.animation = false}
+
+        if (typeof(loop) != 'undefined') {
             
-            if (typeof(loop) != 'undefined') {
-                
-                window.clearInterval(loop);
-
-            }
-
-        } else {
-
-            if (typeof(loop) != 'undefined') {
-                
-                window.clearInterval(loop);
-
-            }
-
-            loop = setInterval(animateDrawing, parseInt(document.querySelector('#animation_speed').value));
+            window.clearInterval(loop);
 
         }
 
-        document.addEventListener('keydown', function(event) {
+        if (window.animation == true) {
+            
+            loop = setInterval(animateDrawing, parseInt(document.querySelector('#delay').value));
 
-            if (event.key == 'Escape') {
-
-                clearInterval(loop);
-
-                let animate = document.querySelector('#animate');
-                
-                animate.checked = false
-
-            }
-
-        });
+        }
 
     }
 
@@ -335,12 +372,12 @@
             if (document.querySelector('#animate_' + key).checked) {
 
                 if (parameters[key]['direction'] == 'inc') {
-                    parameters[key]['value'] = parameters[key]['value'] + parameters[key]['step'];
+                    parameters[key]['value'] = parseInt(parameters[key]['value']) + parseInt(parameters[key]['step']);
                     if (parameters[key]['value'] > parameters[key]['max']) {
                         parameters[key]['direction'] = 'dec';
                     }
                 } else if (parameters[key]['direction'] == 'dec') {
-                    parameters[key]['value'] = parameters[key]['value'] - parameters[key]['step'];
+                    parameters[key]['value'] = parseInt(parameters[key]['value']) - parseInt(parameters[key]['step']);
                     if (parameters[key]['value'] < parameters[key]['min']) {
                         parameters[key]['direction'] = 'inc';
                     }
@@ -363,7 +400,7 @@
                 
                 window.animation = true;
 
-                startAnimation();
+                controlAnimation();
 
             } else {
 
@@ -373,13 +410,30 @@
 
         }
 
-        let animation_speed = document.querySelector('#animation_speed');
+        let delay = document.querySelector('#delay');
 
-        animation_speed.addEventListener('input', (event) => {
+        delay.addEventListener('input', (event) => {
             
-            startAnimation();
+            controlAnimation();
 
         });
+
+        document.addEventListener('keydown', function(event) {
+
+        if (event.key == 'Escape') {
+
+            window.animation = false;
+
+            let animate = document.querySelector('#animate');
+            
+            animate.checked = false
+
+            controlAnimation();
+
+        }
+
+        });
+
 
     }
 
@@ -387,7 +441,7 @@
 
     registerParameterControls(parameters);
 
-    startAnimation();
+    controlAnimation();
 
     listenToScreenSizeChanges();
 
