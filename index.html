@@ -66,7 +66,8 @@
             'show_primes':          {value: false, descr: 'Show prime numbers'},
             'prime_outline_color':  {value: '#f00', descr: 'Prime arc outline color'},
             'prime_fill_color':     {value: '#f00', descr: 'Prime arc fill color'},
-            'number_outline_color': {value: '#f00', descr: 'General outline color'}
+            'general_outline_color': {value: '#f00', descr: 'General outline color'},
+            'general_fill_color':   {value: '#f00', descr: 'General fill color'}
         }
 
         var parameters = {
@@ -217,6 +218,8 @@
                     let name= parameter_and_setting.replace('value_', '');
                     
                     window.config[name]['value'] = event.target.value;
+
+                    controlAnimation();
 
                 })
             
@@ -398,13 +401,20 @@
                 context_dots.moveTo(centerx, centery);
                 context_dots.beginPath();
                 context_dots.arc(x, y, parseInt(parameters.r.value), 0, 2 * Math.PI);
-                context_dots.fillStyle = "#f00";
+                
                 if (config.show_primes.value == true) {
                     context_lines.fillText(num, x, y);
                 }
-                context_dots.strokeStyle = "#00f";
-                context_dots.fill();
-                context_dots.stroke();
+                
+                if (config.prime_fill_color.value.includes('#')) {
+                    context_dots.fillStyle = config.general_fill_color.value;
+                    context_dots.fill();
+                }
+                if (config.prime_outline_color.value.includes('#')) {
+                    context_dots.strokeStyle = config.general_outline_color.value;
+                    context_dots.stroke();
+                }
+
                 
             }
             
@@ -416,9 +426,14 @@
             
         }
 
-        context_lines.strokeStyle = "#555";
-        // context_lines.fill();
-        context_lines.stroke();
+        if (config.general_fill_color.value.includes('#')) {
+            context_lines.fillStyle = config.general_fill_color.value;
+            context_lines.fill();
+        }
+        if (config.general_outline_color.value.includes('#')) {
+            context_lines.strokeStyle = config.general_outline_color.value;
+            context_lines.stroke();
+        }
 
         domContext.drawImage(canvas_lines, 0, 0);
         domContext.drawImage(canvas_dots, 0, 0);
