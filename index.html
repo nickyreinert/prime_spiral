@@ -59,7 +59,7 @@
 
     if (typeof(settings_received) == 'undefined' || !settings_received) {
         
-        console.log('no parameters found');
+        console.log('creating parameters');
 
         var config = {
             'delay': 1,
@@ -78,10 +78,11 @@
             r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'int', animate: true, direction: 'inc'},
         }
         
+        document.cookie = 'settings=' + escape(JSON.stringify({config: config, parameters: parameters}));
+
     }
         
-    document.cookie = 'settings=' + escape(JSON.stringify(parameters));
-    
+
     function getCookie(name) {
         if (document.cookie.length > 0) {
             c_start = document.cookie.indexOf(name + '=');
@@ -108,8 +109,15 @@
         try {
 
             settings = JSON.parse(unescape(settings));
+
             parameters = settings.parameters;
             config = settings.config;
+
+            if (parameters == undefined || config == undefined) {
+
+                throw 'no parameters or config found';
+
+            }
 
         } catch (e) {
 
@@ -121,9 +129,8 @@
         
         settings_received = true;
 
-        console.log(parameters);
-        
         window.parameters = parameters;
+        window.config = config;
 
     }
 
@@ -215,7 +222,7 @@
                         }
 
                         // save everything to the cookie, for next reload
-                        document.cookie = 'settings=' + escape(JSON.stringify(settings = {config: config, parameters: parameters}));
+                        document.cookie = 'settings=' + escape(JSON.stringify({config: window.config, parameters: window.parameters}));
 
                         drawSpiral();
 
