@@ -42,8 +42,7 @@
     <div id="slider_container" class="slider_container">
         <label for="animate">Animate</label>
         <input type="checkbox" id="animate" checked />
-        <label for="delay">Delay in ms</label>
-        <input type="text" size=5 id="delay" value=1 />
+        
     </div>    
 
     <div id="container">
@@ -62,12 +61,12 @@
         console.log('creating parameters');
 
         var config = {
-            'delay': 1,
-            'show_numbers': true,
-            'show_primes': true,
-            'prime_outline_color': '#ff0000',
-            'prime_fill_color': '#ff0000',
-            'number_outline_color': '#ff0000'
+            'delay':                {value: 1, descr: 'Delay'},
+            'show_numbers':         {value: false, descr: 'Show numbers'},
+            'show_primes':          {value: false, descr: 'Show prime numbers'},
+            'prime_outline_color':  {value: '#f00', descr: 'Prime arc outline color'},
+            'prime_fill_color':     {value: '#f00', descr: 'Prime arc fill color'},
+            'number_outline_color': {value: '#f00', descr: 'General outline color'}
         }
 
         var parameters = {
@@ -85,8 +84,7 @@
 
         document.cookie = 'settings=' + escape(JSON.stringify({config: config, parameters: parameters})) + '; SameSite=None; Secure; ' + expires;
 
-    }
-        
+    } 
 
     function getCookie(name) {
         
@@ -141,8 +139,29 @@
 
     }
 
+    function addParameterControls(parameters, config) {
 
-    function registerParameterControls(parameters) {
+        for (const [key, value] of Object.entries(config)) {
+
+            var container = document.createElement('div');
+            if (value.value === true || value.value === false) {
+                
+                if (value.value == true) {var checked = 'checked'} else {var checked = ''};
+                container.innerHTML = 
+                    '<label " for="' + key + '" />' + value.descr + '</label>' + 
+                    '<input type="checkbox" size=3 ' + checked + ' " id="value_' + key + '" />';
+
+            } else {
+
+                container.innerHTML =
+                    '<label " for="' + key + '" />' + value.descr + '</label>' + 
+                    '<input type="text" size=3 value="' + value.value + '" id="value_' + key + '" />';
+
+            }
+            
+            document.getElementById('slider_container').appendChild(container);
+
+        }
 
         for (const [key, value] of Object.entries(parameters)) {
 
@@ -160,8 +179,52 @@
                 '<input type="text" size=3 value="' + value.min + '" id="min_' + key + '" />' +
                 '<input type="text" size=3 value="' + value.max + '" id="max_' + key + '" />' +
                 '<input type="text" size=3 value="' + value.step + '" id="step_' + key + '" />';
-
+            
             document.getElementById('slider_container').appendChild(container);
+
+        }
+    }
+    
+    function registerParameterControls(parameters) {
+
+        for (const [key, value] of Object.entries(config)) {
+
+            let current_control = document.querySelector('#value_' + key);
+
+            console.log(current_control);
+            console.log(value);
+
+            if (value.value === true ||value.value === false) {
+
+                current_control.onclick = function(event) {
+                    
+                    let parameter_and_setting = event.target.getAttribute('id');
+                    let setting = parameter_and_setting.split('_')[0];
+                    let name= parameter_and_setting.replace('value_', '');
+                    
+                    window.config[name]['value'] = event.target.checked;
+                    
+                    controlAnimation();
+
+                }
+
+            } else {
+
+                current_control.addEventListener('input', (event) => {
+
+                    let parameter_and_setting = event.target.getAttribute('id');
+                    let setting = parameter_and_setting.split('_')[0];
+                    let name= parameter_and_setting.replace('value_', '');
+                    
+                    window.config[name]['value'] = event.target.value;
+
+                })
+            
+            }
+                
+        }
+
+        for (const [key, value] of Object.entries(parameters)) {
 
             const controls = ['slider', 'min', 'max', 'step', 'value', 'animate'];
             for (const control of controls) {
@@ -171,8 +234,6 @@
                 if (control == 'animate') {
 
                     current_control.onclick = function(event) {
-
-                        console.log('clicked animate');
 
                         if (event.target.checked) {
 
@@ -281,13 +342,6 @@
         
         for (const [key, attributes] of Object.entries(parameters)) {
 
-            // if (attributes.type == 'int') {
-            //     window[key] = parseInt(attributes.value);
-            // } else if (attributes.type == 'float') {
-            //     window[key] = parseFloat(attributes.value)
-            // }
-            
-            // document.querySelector('#slider_' + key).defaultValue = attributes.value;
             document.querySelector('#slider_' + key).value = attributes.value;
             document.querySelector('#value_' + key).value = attributes.value;
 
@@ -345,14 +399,19 @@
                 context_dots.beginPath();
                 context_dots.arc(x, y, parseInt(parameters.r.value), 0, 2 * Math.PI);
                 context_dots.fillStyle = "#f00";
-                context_lines.fillText(num, x, y);
+                if (config.show_primes.value == true) {
+                    context_lines.fillText(num, x, y);
+                }
                 context_dots.strokeStyle = "#00f";
                 context_dots.fill();
                 context_dots.stroke();
                 
             }
             
-            context_lines.fillText(num, x + 5 , y + 5);
+            if (config.show_numbers.value == true) {
+                context_lines.fillText(num, x + 5 , y + 5);
+            } 
+
             context_lines.lineTo(x, y);
             
         }
@@ -372,15 +431,17 @@
 
         if (window.animated_parameters <= 0) {window.animation = false}
 
+        drawSpiral();
+
         if (typeof(loop) != 'undefined') {
-            
+                        
             window.clearInterval(loop);
 
         }
 
         if (window.animation == true) {
             
-            loop = setInterval(animateDrawing, parseInt(document.querySelector('#delay').value));
+            loop = setInterval(animateDrawing, parseInt(document.querySelector('#value_delay').value));
 
         }
 
@@ -418,7 +479,7 @@
             
         }
         
-        drawSpiral(parameters);
+        drawSpiral();
     }
 
     function registerAnimationControlParameters() {
@@ -441,7 +502,7 @@
 
         }
 
-        let delay = document.querySelector('#delay');
+        let delay = document.querySelector('#value_delay');
 
         delay.addEventListener('input', (event) => {
             
@@ -468,6 +529,8 @@
 
     }
 
+    addParameterControls(parameters, config);
+    
     registerAnimationControlParameters();
 
     registerParameterControls(parameters);
