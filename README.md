@@ -28,3 +28,6 @@ This is inspired by the idea of the **[Ulam spiral](https://de.wikipedia.org/wik
 - the first text field contains the actual value, that also can be controlled by the range slider element
 - the three text fields to the right of the range slider elements control the min, max and step values for each parameter
 
+## Export & Import
+if you want to share your setup, press the button called "export", your parameters will be attached to the URL
+if you call this URL in another browser, your settings will be retreived

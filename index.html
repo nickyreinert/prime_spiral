@@ -42,6 +42,7 @@
     
     <div id="slider_container" class="slider_container">
         <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
+        <input type="button" id="export" value="Export" onClick="exportParameters();" />
         <input type="button" id="hide" value="Hide" onClick="document.querySelector('#parameters_container').hidden = !document.querySelector('#parameters_container').hidden;" />
         <label for="animate">Animate</label>
         <input type="checkbox" id="animate" checked />
@@ -71,6 +72,44 @@
         
         controlAnimation();
         
+    }
+
+    function importParameters() {
+
+        let settings = document.location.search;
+
+        try {
+
+            settings = JSON.parse(atob(settings.substring(1)));
+
+            parameters = settings.parameters;
+            config = settings.config;
+
+            if (parameters == undefined || config == undefined) {
+
+                throw 'no parameters or config found';
+
+            }
+
+        } catch (e) {
+
+            return settings_received;
+
+        }
+        
+        settings_received = true;
+
+        window.parameters = parameters;
+        window.config = config;
+
+        return settings_received;
+
+    }
+
+    function exportParameters() {
+        
+        document.location.search = '?' +  btoa(JSON.stringify({config: config, parameters: parameters}));
+
     }
 
     function getCookie(name) {
@@ -345,11 +384,6 @@
         var screenWidth = window.innerWidth;
         var screenHeight = window.innerHeight;
 
-        // var canvas_dots = document.getElementById('canvas_dots');
-        // var canvas_lines = document.getElementById('canvas_lines');
-        // var context_dots = canvas_dots.getContext("2d");
-        // var context_lines = canvas_lines.getContext("2d");
-
         var canvas_dots = document.createElement('canvas');
         var canvas_lines = document.createElement('canvas');
         var context_dots = canvas_dots.getContext('2d');
@@ -415,7 +449,9 @@
             } 
 
             context_lines.lineTo(x, y);
-            
+            // context_lines.arc(x, y, 2, 0, 2 * Math.PI);
+            // context_lines.fillText('angel: ' + parseInt(angle) + ', x: ' + parseInt(x) + ', y:' + parseInt(y), x, y);
+
         }
 
         if (config.general_fill_color.value.includes('#')) {
@@ -552,7 +588,11 @@
         r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'float', animate: true, direction: 'inc'}
     }
 
+    // first try to read settings from cookie
     var settings_received = restoreParameters();
+
+    // then try to read settings from URL
+    settings_received = importParameters();
 
     if (typeof(settings_received) == 'undefined' || !settings_received) {
         
