@@ -152,6 +152,17 @@
 
         }
 
+        var container = document.createElement('tr');
+        container.innerHTML  = '<td>Param</td>';
+        container.innerHTML += '<td>Value</td>';
+        container.innerHTML += '<td>Range</td>';
+        container.innerHTML += '<td>Anim</td>';
+        container.innerHTML += '<td>Min</td>';
+        container.innerHTML += '<td>Max</td>';
+        container.innerHTML += '<td>Steps</td>';
+
+        document.getElementById('parameters_container').appendChild(container);
+
         for (const [key, value] of Object.entries(window.parameters)) {
 
             var container = document.createElement('tr');
