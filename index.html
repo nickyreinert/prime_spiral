@@ -134,6 +134,17 @@
         return "";
     }
 
+    function saveSettingsToCookie() {
+
+        // save everything to the cookie, for next reload
+        let date = new Date();
+        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+
+        document.cookie = 'settings=' + escape(JSON.stringify({config: window.config, parameters: window.parameters})) + '; SameSite=None; Secure; ' + expires;
+
+    }
+
     function restoreParameters() {
 
         settings_received = false;
@@ -275,15 +286,25 @@
 
                     current_control.onclick = function(event) {
 
+                        // extract the parameter, setting (min, max, ...) and value
+                        let parameter_and_setting = event.target.getAttribute('id');
+                        let parameter = parameter_and_setting.split('_')[1];
+
                         if (event.target.checked) {
 
+                            window.parameters[parameter]['animate'] = true;
+                        
                             animated_parameters += 1;
 
                         } else {
 
+                            window.parameters[parameter]['animate'] = false;
+
                             animated_parameters -= 1;
 
                         }
+
+                        saveSettingsToCookie();
 
                         controlAnimation();
 
@@ -325,12 +346,7 @@
 
                         }
 
-                        // save everything to the cookie, for next reload
-                        let date = new Date();
-                        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                        const expires = "expires=" + date.toUTCString();
-
-                        document.cookie = 'settings=' + escape(JSON.stringify({config: window.config, parameters: window.parameters})) + '; SameSite=None; Secure; ' + expires;
+                        saveSettingsToCookie();
 
                         drawSpiral();
 
@@ -603,11 +619,7 @@
         parameters = JSON.parse(JSON.stringify(default_parameters));
         config = JSON.parse(JSON.stringify(default_config));
 
-        let date = new Date();
-        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-
-        document.cookie = 'settings=' + escape(JSON.stringify({config: config, parameters: parameters})) + '; SameSite=None; Secure; ' + expires;
+        saveSettingsToCookie();
 
     } 
 
