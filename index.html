@@ -30,9 +30,10 @@
       }
 
       .slider_container {
-        width: 100%;
+        width: auto;
         position: fixed;
         z-index: 1000;
+        background-color: #fff;
       }
 
     </style>
@@ -41,6 +42,7 @@
     
     <div id="slider_container" class="slider_container">
         <input type="button" id="reset" value="Reset" onClick="addParameterControls('reset'); registerAnimationControlParameters();" />
+        <input type="button" id="hide" value="Hide" onClick="document.querySelector('#parameters_container').hidden = !document.querySelector('#parameters_container').hidden;" />
         <label for="animate">Animate</label>
         <input type="checkbox" id="animate" checked />
         <table id="parameters_container">
