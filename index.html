@@ -113,8 +113,6 @@
 
         } catch (e) {
 
-            console.log('no parameter cookie found: ' + e);
-
             return settings_received;
 
         }
@@ -191,9 +189,6 @@
 
             let current_control = document.querySelector('#value_' + key);
 
-            console.log(current_control);
-            console.log(value);
-
             if (value.value === true ||value.value === false) {
 
                 current_control.onclick = function(event) {
@@ -256,16 +251,12 @@
 
                     current_control.addEventListener('input', (event) => {
 
-                        console.log('clicked ' + event.target.id);
-
                         // extract the parameter, setting (min, max, ...) and value
                         let parameter_and_setting = event.target.getAttribute('id');
                         let setting = parameter_and_setting.split('_')[0];
                         let parameter = parameter_and_setting.split('_')[1];
                         let value = event.target.value
                         
-                        console.log('setting ' + setting + ' of ' + parameter + ' to ' + value);
-
                         // the slider is the only one that also controls the "value" 
                         // of the current parameter
                         if (setting == 'slider') {
@@ -296,7 +287,6 @@
                         date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
                         const expires = "expires=" + date.toUTCString();
 
-                        console.log('set cookie');
                         document.cookie = 'settings=' + escape(JSON.stringify({config: window.config, parameters: window.parameters})) + '; SameSite=None; Secure; ' + expires;
 
                         drawSpiral();
