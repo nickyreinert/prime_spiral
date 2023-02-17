@@ -46,6 +46,7 @@
         <input type="button" id="hide" value="Hide" onClick="document.querySelector('#parameters_container').hidden = !document.querySelector('#parameters_container').hidden;" />
         <label for="animate">Animate</label>
         <input type="checkbox" id="animate" checked />
+        <a href="https://github.com/nickyreinert/prime_spiral" id="doc" target="_blank">Source & Documentation</a>
         <table id="parameters_container">
         </table>    
     </div>    
@@ -67,7 +68,7 @@
         window.config = JSON.parse(JSON.stringify(default_config));
 
         document.location.search = '';
-        
+
         addParameterControls(); 
         
         registerParameterControls();
