@@ -206,6 +206,7 @@
         for (const [key, value] of Object.entries(window.parameters)) {
 
             var container = document.createElement('tr');
+            if (value.animate == true) {var checked = 'checked'; animated_parameters += 1;} else {var checked = ''};
             container.innerHTML = '<td>' + value.descr + ': </td>' +
                 '<td><input type="text" size=3 value="' + value.value + '" id="value_' + key + '" /></td>' +
                 '<td><input id="slider_' + key + '" ' +
@@ -215,7 +216,7 @@
                     'step="' + value.step + '" ' +
                     'defaultValue="' + value.value + '" ' +
                     'value="' + value.value + '"/></td>' +
-                '<td><input type="checkbox" ' +'id="animate_' + key + '" /></td>' +
+                '<td><input type="checkbox" ' +'id="animate_' + key + '" ' + checked + '/></td>' +
                 '<td><input type="text" size=4 value="' + value.min + '" id="min_' + key + '" /></td>' +
                 '<td><input type="text" size=4 value="' + value.max + '" id="max_' + key + '" /></td>' +
                 '<td><input type="text" size=4 value="' + value.step + '" id="step_' + key + '" /></td>';
@@ -421,9 +422,9 @@
 
             num = num + 1;
 
-            angle = (parseFloat(parameters.smoother.value) * i) + parseFloat(parameters.rotation.value);
-            x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.cos(angle);
-            y = centery + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.sin(angle);
+            angle = ((parseFloat((parameters.smoother.value)) * i) + parseFloat(parameters.rotation.value))
+            x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.sin(angle);
+            y = centery + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.cos(angle);
 
             if (numberIsPrime(num)) {
                 
