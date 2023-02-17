@@ -338,8 +338,8 @@
 
         }
 
-        var domCanvas = document.getElementById('canvas');
-        var domContext = domCanvas.getContext('2d');
+        var canvas_container = document.getElementById('canvas');
+        var context_container = canvas_container.getContext('2d');
 
         var screenWidth = window.innerWidth;
         var screenHeight = window.innerHeight;
@@ -354,15 +354,18 @@
         var context_dots = canvas_dots.getContext('2d');
         var context_lines = canvas_lines.getContext("2d");
 
-        domCanvas.width = screenWidth;
-        domCanvas.height = screenHeight;
-        canvas_lines.width = screenWidth;
-        canvas_lines.height = screenHeight;
-        canvas_dots.width = screenWidth;
-        canvas_dots.height = screenHeight;
+        canvas_container.style.width = screenWidth + 'px';
+        canvas_container.style.height = screenHeight + 'px';
+        canvas_container.width = screenWidth * parseInt(config.scale.value);
+        canvas_container.height = screenHeight * parseInt(config.scale.value);
 
-        domContext.clearRect(0, 0, screenWidth, screenHeight);
-        domCanvas.width+=0; 
+        canvas_lines.width = screenWidth * parseInt(config.scale.value);
+        canvas_lines.height = screenHeight * parseInt(config.scale.value);
+        canvas_dots.width = screenWidth * parseInt(config.scale.value);
+        canvas_dots.height = screenHeight * parseInt(config.scale.value);
+
+        context_container.clearRect(0, 0, screenWidth, screenHeight);
+        // domCanvas.width += 0; 
         context_lines.clearRect(0, 0, screenWidth, screenHeight);
         context_dots.clearRect(0, 0, screenWidth, screenHeight);
 
@@ -423,8 +426,8 @@
             context_lines.stroke();
         }
 
-        domContext.drawImage(canvas_lines, 0, 0);
-        domContext.drawImage(canvas_dots, 0, 0);
+        context_container.drawImage(canvas_lines, 0, 0);
+        context_container.drawImage(canvas_dots, 0, 0);
 
     }
 
@@ -530,20 +533,21 @@
 
     const default_config = {
             'delay':                {value: 1, descr: 'Delay'},
-            'show_numbers':         {value: false, descr: 'Show numbers'},
+            'show_numbers':         {value: true, descr: 'Show numbers'},
             'show_primes':          {value: false, descr: 'Show prime numbers'},
             'prime_outline_color':  {value: '#ff0000', descr: 'Prime arc outline color'},
             'prime_fill_color':     {value: '#bb9999', descr: 'Prime arc fill color'},
             'general_outline_color': {value: '#353535', descr: 'General outline color'},
-            'general_fill_color':   {value: '', descr: 'General fill color'}
+            'general_fill_color':   {value: '', descr: 'General fill color'},
+            'scale':                {value: 1, descr: 'Resolution scale'}
         }
 
     const default_parameters = {
         range:      {value: 360, min: 90, max: 1440 * 1, step: 1, descr: 'Range', type: 'int', animate: false, direction: 'inc'},
         smoother:   {value: 0.1, min: -1, max: 1, step: 0.01, descr: 'Density', type: 'float', animate: true, direction: 'inc'},
         rotation:   {value: 0, min: -90, max: 90, step: 0.1, descr: 'Rotation', type: 'float', animate: true, direction: 'inc'},
-        a:          {value: 1, min: -100, max: 100, step: 1, descr: 'Slope', type: 'float', animate: true, direction: 'inc'},
-        b:          {value: 3, min: -50, max: 50, step: 1, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
+        a:          {value: 100, min: -100, max: 100, step: 1, descr: 'Slope', type: 'float', animate: true, direction: 'inc'},
+        b:          {value: 5, min: -50, max: 50, step: 1, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
         r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'float', animate: true, direction: 'inc'}
     }
 
