@@ -68,8 +68,6 @@
         addParameterControls(); 
         
         registerParameterControls();
-
-        registerAnimationControlParameters();
         
         controlAnimation();
         
@@ -506,14 +504,6 @@
             controlAnimation();
 
         }
-
-        let delay = document.querySelector('#value_delay');
-
-        delay.addEventListener('input', (event) => {
-            
-            controlAnimation();
-
-        });
 
         document.addEventListener('keydown', function(event) {
 
