@@ -41,7 +41,7 @@
   <body>
     
     <div id="slider_container" class="slider_container">
-        <input type="button" id="reset" value="Reset" onClick="addParameterControls('reset'); registerAnimationControlParameters();" />
+        <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
         <input type="button" id="hide" value="Hide" onClick="document.querySelector('#parameters_container').hidden = !document.querySelector('#parameters_container').hidden;" />
         <label for="animate">Animate</label>
         <input type="checkbox" id="animate" checked />
@@ -54,6 +54,26 @@
     </div>
 
     <script>
+
+    function resetParameters() {
+        
+        document.getElementById('parameters_container').remove();
+        var parameters_container = document.createElement('table');
+        parameters_container.id = 'parameters_container';
+        document.getElementById('slider_container').appendChild(parameters_container);
+
+        window.parameters = JSON.parse(JSON.stringify(default_parameters));
+        window.config = JSON.parse(JSON.stringify(default_config));
+
+        addParameterControls(); 
+        
+        registerParameterControls();
+
+        registerAnimationControlParameters();
+        
+        controlAnimation();
+        
+    }
 
     function getCookie(name) {
         
@@ -110,19 +130,7 @@
 
     }
 
-    function addParameterControls(reset) {
-
-        document.getElementById('parameters_container').remove();
-        var parameters_container = document.createElement('table');
-        parameters_container.id = 'parameters_container';
-        document.getElementById('slider_container').appendChild(parameters_container);
-
-        if (reset == 'reset') {
-
-            parameters = JSON.parse(JSON.stringify(default_parameters));
-            config = JSON.parse(JSON.stringify(default_config));
-
-        }
+    function addParameterControls() {
 
         for (const [key, value] of Object.entries(config)) {
 
@@ -168,7 +176,7 @@
         }
     }
     
-    function registerParameterControls(parameters) {
+    function registerParameterControls() {
 
         for (const [key, value] of Object.entries(config)) {
 
@@ -489,13 +497,13 @@
                 
                 window.animation = true;
 
-                controlAnimation();
-
             } else {
 
                 window.animation = false;
 
             }
+
+            controlAnimation();
 
         }
 
@@ -537,16 +545,16 @@
             'prime_outline_color':  {value: '#ff0000', descr: 'Prime arc outline color'},
             'prime_fill_color':     {value: '#bb9999', descr: 'Prime arc fill color'},
             'general_outline_color': {value: '#353535', descr: 'General outline color'},
-            'general_fill_color':   {value: '#ffffff', descr: 'General fill color'}
+            'general_fill_color':   {value: '', descr: 'General fill color'}
         }
 
     const default_parameters = {
         range:      {value: 360, min: 90, max: 1440 * 1, step: 1, descr: 'Range', type: 'int', animate: false, direction: 'inc'},
         smoother:   {value: 0.1, min: -1, max: 1, step: 0.01, descr: 'Density', type: 'float', animate: true, direction: 'inc'},
         rotation:   {value: 0, min: -90, max: 90, step: 0.1, descr: 'Rotation', type: 'float', animate: true, direction: 'inc'},
-        a:          {value: 1, min: -100, max: 100, step: 1, descr: 'Slope', type: 'int', animate: true, direction: 'inc'},
+        a:          {value: 1, min: -100, max: 100, step: 1, descr: 'Slope', type: 'float', animate: true, direction: 'inc'},
         b:          {value: 3, min: -50, max: 50, step: 1, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
-        r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'int', animate: true, direction: 'inc'}
+        r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'float', animate: true, direction: 'inc'}
     }
 
     var settings_received = restoreParameters();
@@ -568,7 +576,7 @@
     
     registerAnimationControlParameters();
 
-    registerParameterControls(parameters);
+    registerParameterControls();
 
     controlAnimation();
 
