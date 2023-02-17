@@ -3,7 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Canvas</title>
+    <title>Prime-Spiral</title>
     <style>
       body {
         margin: 0;
@@ -40,9 +40,11 @@
   <body>
     
     <div id="slider_container" class="slider_container">
+        <input type="button" id="reset" value="Reset" onClick="addParameterControls('reset'); registerAnimationControlParameters();" />
         <label for="animate">Animate</label>
         <input type="checkbox" id="animate" checked />
-        
+        <div id="parameters_container">
+        </div>    
     </div>    
 
     <div id="container">
@@ -50,42 +52,6 @@
     </div>
 
     <script>
-
-    const animation = true;
-    var animated_parameters = 0;
-
-    restoreParameters();
-
-    if (typeof(settings_received) == 'undefined' || !settings_received) {
-        
-        console.log('creating parameters');
-
-        var config = {
-            'delay':                {value: 1, descr: 'Delay'},
-            'show_numbers':         {value: false, descr: 'Show numbers'},
-            'show_primes':          {value: false, descr: 'Show prime numbers'},
-            'prime_outline_color':  {value: '#f00', descr: 'Prime arc outline color'},
-            'prime_fill_color':     {value: '#f00', descr: 'Prime arc fill color'},
-            'general_outline_color': {value: '#f00', descr: 'General outline color'},
-            'general_fill_color':   {value: '#f00', descr: 'General fill color'}
-        }
-
-        var parameters = {
-            range:      {value: 90, min: 90, max: 1440 * 1, step: 1, descr: 'Range', type: 'int', animate: false, direction: 'inc'},
-            smoother:   {value: 0.1, min: -1, max: 1, step: 0.01, descr: 'Density', type: 'float', animate: true, direction: 'inc'},
-            rotation:   {value: 0, min: -90, max: 90, step: 0.1, descr: 'Rotation', type: 'float', animate: true, direction: 'inc'},
-            a:          {value: 1, min: -100, max: 100, step: 1, descr: 'Slope', type: 'int', animate: true, direction: 'inc'},
-            b:          {value: 3, min: -50, max: 50, step: 1, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
-            r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'int', animate: true, direction: 'inc'}
-        }
-        
-        let date = new Date();
-        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-
-        document.cookie = 'settings=' + escape(JSON.stringify({config: config, parameters: parameters})) + '; SameSite=None; Secure; ' + expires;
-
-    } 
 
     function getCookie(name) {
         
@@ -129,7 +95,7 @@
 
             console.log('no parameter cookie found: ' + e);
 
-            return;
+            return settings_received;
 
         }
         
@@ -138,9 +104,23 @@
         window.parameters = parameters;
         window.config = config;
 
+        return settings_received;
+
     }
 
-    function addParameterControls(parameters, config) {
+    function addParameterControls(reset) {
+
+        document.getElementById('parameters_container').remove();
+        var parameters_container = document.createElement('div');
+        parameters_container.id = 'parameters_container';
+        document.getElementById('slider_container').appendChild(parameters_container);
+
+        if (reset == 'reset') {
+
+            parameters = JSON.parse(JSON.stringify(default_parameters));
+            config = JSON.parse(JSON.stringify(default_config));
+
+        }
 
         for (const [key, value] of Object.entries(config)) {
 
@@ -156,15 +136,15 @@
 
                 container.innerHTML =
                     '<label " for="' + key + '" />' + value.descr + '</label>' + 
-                    '<input type="text" size=3 value="' + value.value + '" id="value_' + key + '" />';
+                    '<input type="text" size=8 value="' + value.value + '" id="value_' + key + '" />';
 
             }
             
-            document.getElementById('slider_container').appendChild(container);
+            document.getElementById('parameters_container').appendChild(container);
 
         }
 
-        for (const [key, value] of Object.entries(parameters)) {
+        for (const [key, value] of Object.entries(window.parameters)) {
 
             var container = document.createElement('div');
             container.innerHTML = value.descr + ': ' +
@@ -181,7 +161,7 @@
                 '<input type="text" size=3 value="' + value.max + '" id="max_' + key + '" />' +
                 '<input type="text" size=3 value="' + value.step + '" id="step_' + key + '" />';
             
-            document.getElementById('slider_container').appendChild(container);
+            document.getElementById('parameters_container').appendChild(container);
 
         }
     }
@@ -544,7 +524,45 @@
 
     }
 
-    addParameterControls(parameters, config);
+    const animation = true;
+    
+    var animated_parameters = 0;
+
+    const default_config = {
+            'delay':                {value: 1, descr: 'Delay'},
+            'show_numbers':         {value: false, descr: 'Show numbers'},
+            'show_primes':          {value: false, descr: 'Show prime numbers'},
+            'prime_outline_color':  {value: '#f00', descr: 'Prime arc outline color'},
+            'prime_fill_color':     {value: '#f00', descr: 'Prime arc fill color'},
+            'general_outline_color': {value: '#f00', descr: 'General outline color'},
+            'general_fill_color':   {value: '#ffffff', descr: 'General fill color'}
+        }
+
+    const default_parameters = {
+        range:      {value: 90, min: 90, max: 1440 * 1, step: 1, descr: 'Range', type: 'int', animate: false, direction: 'inc'},
+        smoother:   {value: 0.1, min: -1, max: 1, step: 0.01, descr: 'Density', type: 'float', animate: true, direction: 'inc'},
+        rotation:   {value: 0, min: -90, max: 90, step: 0.1, descr: 'Rotation', type: 'float', animate: true, direction: 'inc'},
+        a:          {value: 1, min: -100, max: 100, step: 1, descr: 'Slope', type: 'int', animate: true, direction: 'inc'},
+        b:          {value: 3, min: -50, max: 50, step: 1, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
+        r:          {value: 3, min: 1, max: 100, step: 1, descr: 'Radius', type: 'int', animate: true, direction: 'inc'}
+    }
+
+    var settings_received = restoreParameters();
+
+    if (typeof(settings_received) == 'undefined' || !settings_received) {
+        
+        parameters = JSON.parse(JSON.stringify(default_parameters));
+        config = JSON.parse(JSON.stringify(default_config));
+
+        let date = new Date();
+        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+
+        document.cookie = 'settings=' + escape(JSON.stringify({config: config, parameters: parameters})) + '; SameSite=None; Secure; ' + expires;
+
+    } 
+
+    addParameterControls();
     
     registerAnimationControlParameters();
 
