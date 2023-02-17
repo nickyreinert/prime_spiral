@@ -66,6 +66,8 @@
         window.parameters = JSON.parse(JSON.stringify(default_parameters));
         window.config = JSON.parse(JSON.stringify(default_config));
 
+        document.location.search = '';
+        
         addParameterControls(); 
         
         registerParameterControls();
