@@ -373,13 +373,19 @@
       
     function numberIsPrime(num) {
         
+        if (num < 2) {return false;}
+
+        if (primes.includes(num)) return true;
+
         for(let i = 2, s = Math.sqrt(num); i <= s; i++) {
 
             if (num % i  === 0) return false;
         
         }
 
-        return num > 1;
+        primes.push(num);
+
+        return true;
     }
 
     function fitElementToScreen(element) {
@@ -585,6 +591,8 @@
 
 
     }
+
+    var primes = [];
 
     const animation = true;
     
