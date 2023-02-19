@@ -385,6 +385,7 @@
 
         primes.push(num);
 
+        console.log((num + 1) / 2);
         return true;
     }
 
@@ -441,24 +442,31 @@
 
         context_lines.moveTo(centerx, centery);
         context_lines.beginPath();
+
+        previous_x = centerx;
+        previous_y = centery;
         
         for (i = 0; i < parseInt(parameters.range.value); i++) {
 
             num = num + 1;
 
-            angle = ((parseFloat((parameters.smoother.value)) * i) + parseFloat(parameters.rotation.value))
+            angle = (parseFloat((parameters.smoother.value)) * i) + parseFloat(parameters.rotation.value)
             x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.sin(angle);
             y = centery + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.cos(angle);
 
             if (numberIsPrime(num)) {
-                
+
                 context_dots.moveTo(centerx, centery);
                 context_dots.beginPath();
-                context_dots.arc(x, y, parseInt(parameters.r.value), 0, 2 * Math.PI);
-                
-                if (config.show_primes.value == true) {
-                    context_lines.fillText(num, x, y);
+
+                if (config.show_primes_rays.value == true) {
+                    context_dots.lineTo(centerx, centery);
                 }
+
+                context_dots.arc(x, y, parseInt(parameters.r.value), 0, 2 * Math.PI);
+
+                previous_x = x;
+                previous_y = y;
                 
                 if (config.prime_fill_color.value.includes('#')) {
                     context_dots.fillStyle = config.prime_fill_color.value;
@@ -469,6 +477,9 @@
                     context_dots.stroke();
                 }
 
+                if (config.show_primes.value == true) {
+                    context_lines.fillText(num, x, y);
+                }
                 
             }
             
@@ -602,6 +613,7 @@
             'delay':                {value: 10, descr: 'Delay'},
             'show_numbers':         {value: false, descr: 'Show numbers'},
             'show_primes':          {value: false, descr: 'Show prime numbers'},
+            'show_primes_rays':     {value: false, descr: 'Show prime rays from the center'},
             'prime_outline_color':  {value: '#ff0000', descr: 'Prime arc outline color'},
             'prime_fill_color':     {value: '#bb9999', descr: 'Prime arc fill color'},
             'general_outline_color': {value: '#353535', descr: 'General outline color'},
