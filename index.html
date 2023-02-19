@@ -385,8 +385,23 @@
 
         primes.push(num);
 
-        console.log((num + 1) / 2);
         return true;
+    }
+
+    function hexToRgb(hex) {
+        // thanks to https://stackoverflow.com/a/5624139/2360229
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
     }
 
     function fitElementToScreen(element) {
@@ -450,11 +465,13 @@
 
         context_dots.lineWidth = 5;
 
+        prime_fill_color_rgb = hexToRgb(config.prime_fill_color.value);
+
         for (i = 0; i < parseInt(parameters.range.value); i++) {
 
             num = num + 1;
 
-            if (config.relative_ray_width.value == true) {
+            if (config.relative_line_width.value == true) {
                 
                 context_dots.lineWidth = parseInt(100 * i / max_ray_width);
             }
@@ -480,8 +497,24 @@
                 previous_y = y;
                 
                 if (config.prime_fill_color.value.includes('#')) {
-                    context_dots.fillStyle = config.prime_fill_color.value;
+                    if (config.fading_fill_color.value == true){
+                        factor = Math.round((100 - Math.floor(100 * i / parameters.range.value))) / 100
+                        context_dots.fillStyle = "rgb(" +
+                            Math.floor(prime_fill_color_rgb.r - prime_fill_color_rgb.r * factor) + "," +
+                            Math.floor(prime_fill_color_rgb.g - prime_fill_color_rgb.g * factor) + "," +
+                            Math.floor(prime_fill_color_rgb.b - prime_fill_color_rgb.b * factor) + 
+                            ")";
+
+                            console.log(context_dots.fillStyle);
+
+                    } else {
+
+                        context_dots.fillStyle = config.prime_fill_color.value;
+
+                    }
+                    
                     context_dots.fill();
+
                 }
                 if (config.prime_outline_color.value.includes('#')) {
                     context_dots.strokeStyle = config.prime_outline_color.value;
@@ -625,10 +658,11 @@
             'delay':                {value: 10, descr: 'Delay'},
             'show_numbers':         {value: false, descr: 'Show numbers'},
             'show_primes':          {value: false, descr: 'Show prime numbers'},
-            'show_primes_rays':     {value: false, descr: 'Show prime rays from the center'},
-            'relative_line_width':   {value: false, descr: 'Line width depending on the prime number'},
+            'show_primes_rays':     {value: false, descr: 'Prime rays from the center'},
+            'relative_line_width':   {value: false, descr: 'Relative line width'},
             'prime_outline_color':  {value: '#ff0000', descr: 'Prime arc outline color'},
             'prime_fill_color':     {value: '#bb9999', descr: 'Prime arc fill color'},
+            'fading_fill_color':    {value: false, descr: 'Fill color fades out'},
             'general_outline_color': {value: '#353535', descr: 'General outline color'},
             'general_fill_color':   {value: '', descr: 'General fill color'},
             'scale':                {value: 1, descr: 'Resolution scale'}
