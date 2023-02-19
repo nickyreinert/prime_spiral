@@ -446,13 +446,24 @@
         previous_x = centerx;
         previous_y = centery;
         
+        max_ray_width = parameters.range.value;
+
+        context_dots.lineWidth = 5;
+
         for (i = 0; i < parseInt(parameters.range.value); i++) {
 
             num = num + 1;
 
+            if (config.relative_ray_width.value == true) {
+                
+                context_dots.lineWidth = parseInt(100 * i / max_ray_width);
+            }
+
             angle = (parseFloat((parameters.smoother.value)) * i) + parseFloat(parameters.rotation.value)
             x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.sin(angle);
             y = centery + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.cos(angle);
+
+            context_dots.lineCap = "round";
 
             if (numberIsPrime(num)) {
 
@@ -476,6 +487,7 @@
                     context_dots.strokeStyle = config.prime_outline_color.value;
                     context_dots.stroke();
                 }
+
 
                 if (config.show_primes.value == true) {
                     context_lines.fillText(num, x, y);
@@ -614,6 +626,7 @@
             'show_numbers':         {value: false, descr: 'Show numbers'},
             'show_primes':          {value: false, descr: 'Show prime numbers'},
             'show_primes_rays':     {value: false, descr: 'Show prime rays from the center'},
+            'relative_line_width':   {value: false, descr: 'Line width depending on the prime number'},
             'prime_outline_color':  {value: '#ff0000', descr: 'Prime arc outline color'},
             'prime_fill_color':     {value: '#bb9999', descr: 'Prime arc fill color'},
             'general_outline_color': {value: '#353535', descr: 'General outline color'},
