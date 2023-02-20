@@ -555,9 +555,9 @@
             if (config.fading_fill_color.value == true){
                 factor = Math.round((100 - Math.floor(100 * i / parameters.range.value))) / 100
                 context_dots.fillStyle = "rgba(" +
-                    Math.floor(prime_fill_color_rgb.r - prime_fill_color_rgb.r * factor) + "," +
-                    Math.floor(prime_fill_color_rgb.g - prime_fill_color_rgb.g * factor) + "," +
-                    Math.floor(prime_fill_color_rgb.b - prime_fill_color_rgb.b * factor) + "," +
+                    Math.floor(255 - prime_fill_color_rgb.r * factor) + "," +
+                    Math.floor(255 - prime_fill_color_rgb.g * factor) + "," +
+                    Math.floor(255 - prime_fill_color_rgb.b * factor) + "," +
                     Math.floor(1) + 
                     ")";
 
