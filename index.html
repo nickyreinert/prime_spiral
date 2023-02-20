@@ -429,8 +429,9 @@
         var screenHeight = window.innerHeight;
 
         var canvas_dots = document.createElement('canvas');
-        var canvas_lines = document.createElement('canvas');
         var context_dots = canvas_dots.getContext('2d');
+
+        var canvas_lines = document.createElement('canvas');
         var context_lines = canvas_lines.getContext("2d");
 
         canvas_container.style.width = screenWidth + 'px';
@@ -458,14 +459,12 @@
         context_lines.moveTo(centerx, centery);
         context_lines.beginPath();
 
-        previous_x = centerx;
-        previous_y = centery;
-        
         max_ray_width = parameters.range.value;
 
         context_dots.lineWidth = 5;
 
         prime_fill_color_rgb = hexToRgb(config.prime_fill_color.value);
+        context_dots.lineCap = "round";
 
         for (i = 0; i < parseInt(parameters.range.value); i++) {
 
@@ -473,54 +472,25 @@
 
             if (config.relative_line_width.value == true) {
                 
-                context_dots.lineWidth = parseInt(100 * i / max_ray_width);
+                context_dots.lineWidth = 100 - parseInt(100 * i / max_ray_width);
+
             }
 
             angle = (parseFloat((parameters.smoother.value)) * i) + parseFloat(parameters.rotation.value)
             x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.sin(angle);
             y = centery + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.cos(angle);
 
-            context_dots.lineCap = "round";
-
             if (numberIsPrime(num)) {
 
-                context_dots.moveTo(centerx, centery);
-                context_dots.beginPath();
+                // context_dots.moveTo(centerx, centery);
+                // context_dots.beginPath();
 
-                if (config.show_primes_rays.value == true) {
-                    context_dots.lineTo(centerx, centery);
-                }
+                // if (config.show_primes_rays.value == true) {
+                //     context_dots.lineTo(x - parameters.r.value, y - parameters.r.value);
+                //     context_dots.stroke();
+                // }
 
-                context_dots.arc(x, y, parseInt(parameters.r.value), 0, 2 * Math.PI);
-
-                previous_x = x;
-                previous_y = y;
-                
-                if (config.prime_fill_color.value.includes('#')) {
-                    if (config.fading_fill_color.value == true){
-                        factor = Math.round((100 - Math.floor(100 * i / parameters.range.value))) / 100
-                        context_dots.fillStyle = "rgb(" +
-                            Math.floor(prime_fill_color_rgb.r - prime_fill_color_rgb.r * factor) + "," +
-                            Math.floor(prime_fill_color_rgb.g - prime_fill_color_rgb.g * factor) + "," +
-                            Math.floor(prime_fill_color_rgb.b - prime_fill_color_rgb.b * factor) + 
-                            ")";
-
-                            console.log(context_dots.fillStyle);
-
-                    } else {
-
-                        context_dots.fillStyle = config.prime_fill_color.value;
-
-                    }
-                    
-                    context_dots.fill();
-
-                }
-                if (config.prime_outline_color.value.includes('#')) {
-                    context_dots.strokeStyle = config.prime_outline_color.value;
-                    context_dots.stroke();
-                }
-
+                drawArcs(x, y, context_dots);
 
                 if (config.show_primes.value == true) {
                     context_lines.fillText(num, x, y);
@@ -549,6 +519,44 @@
 
         context_container.drawImage(canvas_lines, 0, 0);
         context_container.drawImage(canvas_dots, 0, 0);
+
+    }
+
+    function drawArcs(x, y, context_dots) {
+
+        context_dots.beginPath();
+        
+        // set position
+        context_dots.arc(x, y, parseInt(parameters.r.value), 0, 2 * Math.PI);
+        
+        // fill the arc
+        if (config.prime_fill_color.value.includes('#')) {
+
+            if (config.fading_fill_color.value == true){
+                factor = Math.round((100 - Math.floor(100 * i / parameters.range.value))) / 100
+                context_dots.fillStyle = "rgb(" +
+                    Math.floor(prime_fill_color_rgb.r - prime_fill_color_rgb.r * factor) + "," +
+                    Math.floor(prime_fill_color_rgb.g - prime_fill_color_rgb.g * factor) + "," +
+                    Math.floor(prime_fill_color_rgb.b - prime_fill_color_rgb.b * factor) + 
+                    ")";
+
+            } else {
+
+                context_dots.fillStyle = config.prime_fill_color.value;
+
+            }
+            
+            context_dots.fill();
+
+        }
+
+        // draw outline
+        if (config.prime_outline_color.value.includes('#')) {
+
+            context_dots.strokeStyle = config.prime_outline_color.value;
+            context_dots.stroke();
+            
+        }
 
     }
 
@@ -633,11 +641,11 @@
 
         if (event.key == 'Escape') {
 
-            window.animation = false;
+            window.animation = !window.animation;
 
             let animate = document.querySelector('#animate');
             
-            animate.checked = false
+            animate.checked = !animate.checked;
 
             controlAnimation();
 
