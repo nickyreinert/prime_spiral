@@ -43,9 +43,10 @@
     <div id="slider_container" class="slider_container">
         <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
         <input type="button" id="export" value="Export" onClick="exportParameters();" />
-        <input type="button" id="hide" value="Hide (Enter)" onClick="showControls();" />
+        <input type="button" id="hide" value="Hide (Enter)" onClick="showHideControls();" />
         <label for="animate">Animate (Esc)</label>
         <input type="checkbox" id="animate" checked />
+        <input type="range" min=25 max= 100 step=20 value=75 id="overlay_alpha" onClick="adjustOverlayAlpha();" />
         <a href="https://github.com/nickyreinert/prime_spiral" id="doc" target="_blank">Source & Documentation</a>
         <table id="parameters_container">
         </table>    
@@ -57,6 +58,14 @@
 
     <script>
 
+    function adjustOverlayAlpha() {
+
+        let parameters_container = document.querySelector('#slider_container');
+
+        parameters_container.style.opacity = document.querySelector('#overlay_alpha').value / 100;
+
+    }
+    
     function resetParameters() {
         
         document.getElementById('parameters_container').remove();
@@ -242,6 +251,7 @@
         }
 
     }
+    
     function addParameterControls() {
 
 
@@ -440,7 +450,6 @@
 
         return true;
     }
-
     function hexToRgb(hex) {
         // thanks to https://stackoverflow.com/a/5624139/2360229
         // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
@@ -627,7 +636,6 @@
         }
 
     }
-
     function drawArcs(x, y, context_dots) {
 
         context_dots.beginPath();
@@ -788,10 +796,10 @@
     var animated_parameters = 0;
 
     const default_config = {
-            'delay':                    {group: "A", value: 10, descr: 'Delay'},
-            'scale':                    {group: "A", value: 1, descr: 'Resolution scale'},
-            'x_angle':                  {group: "AA", value: ['cos', 'sin', 'tan'], selected: 'cos', descr: 'Calculate X angle by'},
-            'y_angle':                  {group: "AA", value: ['cos', 'sin', 'tan'], selected: 'sin', descr: 'Calculate Y angle by'},
+            'delay':                    {group: "AA", value: 10, descr: 'Delay'},
+            'scale':                    {group: "AA", value: 1, descr: 'Resolution scale'},
+            'x_angle':                  {group: "AAA", value: ['cos', 'sin', 'tan'], selected: 'cos', descr: 'Calculate X angle by'},
+            'y_angle':                  {group: "AAA", value: ['cos', 'sin', 'tan'], selected: 'sin', descr: 'Calculate Y angle by'},
             'show_numbers':             {group: "B", value: false, descr: 'Show numbers'},
             'show_primes':              {group: "B", value: false, descr: 'Show prime numbers'},
             'show_primes_rays':         {group: "C", value: false, descr: 'Prime rays from the center'},
