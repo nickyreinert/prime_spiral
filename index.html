@@ -462,11 +462,11 @@
         contexts['lines'].moveTo(centerx, centery);
         contexts['lines'].beginPath();
 
-        max_ray_width = parameters.range.value;
-
         contexts['dots'].lineWidth = 5;
 
         prime_fill_color_rgb = hexToRgb(config.prime_fill_color.value);
+        prime_line_color_rgb = hexToRgb(config.prime_outline_color.value);
+
         contexts['dots'].lineCap = "round";
 
         for (i = 0; i < parseInt(parameters.range.value); i++) {
@@ -519,11 +519,25 @@
 
         if (config.show_primes_rays.value == true) {
             
-            
+            context.lineWidth = parseInt(config.ray_width.value);
+            context.strokeStyle = config.prime_outline_color.value;
+
             if (config.relative_line_width.value == true) {
                 
-                context.lineWidth = 100 - parseInt(100 * i / max_ray_width);
-                
+                context.lineWidth = parseInt(config.ray_width.value) - parseInt(100 * i / parameters.range.value);
+    
+                if (config.fading_line.value == true) {
+
+                    factor = Math.round((100 - Math.floor(100 * i / parameters.range.value))) / 100
+                    context.strokeStyle = "rgba(" +
+                        Math.floor(prime_line_color_rgb.r) + "," +
+                        Math.floor(prime_line_color_rgb.g) + "," +
+                        Math.floor(prime_line_color_rgb.b) + "," +
+                        parseFloat(1 - factor) + 
+                        ")";
+
+                }
+                    
             }
             
             context.beginPath();
@@ -684,7 +698,9 @@
             'show_numbers':         {value: false, descr: 'Show numbers'},
             'show_primes':          {value: false, descr: 'Show prime numbers'},
             'show_primes_rays':     {value: false, descr: 'Prime rays from the center'},
+            'ray_width':            {value: 10, descr: 'Width of the prime rays'},
             'relative_line_width':   {value: false, descr: 'Relative line width'},
+            'fading_line':          {value: false, descr: 'Fade out lines'},
             'prime_outline_color':  {value: '#ff0000', descr: 'Prime arc outline color'},
             'prime_fill_color':     {value: '#bb9999', descr: 'Prime arc fill color'},
             'fading_fill_color':    {value: false, descr: 'Fill color fades out'},
