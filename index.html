@@ -699,27 +699,50 @@
 
     function animateDrawing() {
 
+        // used to count the precision of float values to round the result
+        var decimals = 0;
+
+        // if in animation mode, loop through all parameters
         for (const [key, attributes] of Object.entries(parameters)) {
 
+            // check if the current parameter is set to be animated
             if (document.querySelector('#animate_' + key).checked) {
 
+                // check if the current value needs to be incremented
                 if (parameters[key]['direction'] == 'inc') {
+
+                    // check if the current value is a float or an integer
                     if (parameters[key]['type'] == 'float') {
-                        parameters[key]['value'] = parseFloat(parameters[key]['value']) + parseFloat(parameters[key]['step']);
+
+                        // get current precision
+                        decimals = (parameters[key]['step'] + "").split('.')[1].length;
+
+                        parameters[key]['value'] = (parseFloat(parameters[key]['value']) + parseFloat(parameters[key]['step'])).toFixed(decimals);
+
                     } else if (parameters[key]['type'] == 'int') {
                         parameters[key]['value'] = parseInt(parameters[key]['value']) + parseInt(parameters[key]['step']);
                     }
                     
+                    // if parameter reached max value, change direction
                     if (parameters[key]['value'] > parameters[key]['max']) {
                         parameters[key]['direction'] = 'dec';
                     }
+                
+                // check if the current value needs to be incremented
                 } else if (parameters[key]['direction'] == 'dec') {
+
+                    // check if the current value is a float or an integer
                     if (parameters[key]['type'] == 'float') {
-                        parameters[key]['value'] = parseFloat(parameters[key]['value']) - parseFloat(parameters[key]['step']);
+
+                        // get current precision
+                        decimals = (parameters[key]['step'] + "").split('.')[1].length;
+
+                        parameters[key]['value'] = (parseFloat(parameters[key]['value']) - parseFloat(parameters[key]['step'])).toFixed(decimals);
                     } else if (parameters[key]['type'] == 'int') {
                         parameters[key]['value'] = parseInt(parameters[key]['value']) - parseInt(parameters[key]['step']);
                     }
                     
+                    // if parameter reached max value, change direction
                     if (parameters[key]['value'] < parameters[key]['min']) {
                         parameters[key]['direction'] = 'inc';
                     }
