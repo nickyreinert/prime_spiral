@@ -43,8 +43,8 @@
     <div id="slider_container" class="slider_container">
         <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
         <input type="button" id="export" value="Export" onClick="exportParameters();" />
-        <input type="button" id="hide" value="Hide" onClick="document.querySelector('#parameters_container').hidden = !document.querySelector('#parameters_container').hidden;" />
-        <label for="animate">Animate</label>
+        <input type="button" id="hide" value="Hide (Enter)" onClick="showHideParametersContainer();" />
+        <label for="animate">Animate (Esc)</label>
         <input type="checkbox" id="animate" checked />
         <a href="https://github.com/nickyreinert/prime_spiral" id="doc" target="_blank">Source & Documentation</a>
         <table id="parameters_container">
@@ -474,7 +474,7 @@
             num = num + 1;
 
             angle = (parseFloat((parameters.smoother.value)) * i) + parseFloat(parameters.rotation.value)
-            x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.sin(angle);
+            x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.tan(angle);
             y = centery + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.cos(angle);
 
 
@@ -648,6 +648,18 @@
         drawSpiral();
     }
 
+    function showHideParametersContainer() {
+
+        let parameters_container = document.querySelector('#parameters_container');
+
+        if (parameters_container.style.display == 'none') {
+            parameters_container.style.display = 'block';
+        } else {
+            parameters_container.style.display = 'none';
+        }
+
+    }
+
     function registerAnimationControlParameters() {
         
         let animate = document.querySelector('#animate');
@@ -669,6 +681,12 @@
         }
 
         document.addEventListener('keydown', function(event) {
+
+        if (event.key == 'Enter') {
+
+            showHideParametersContainer();
+
+        }
 
         if (event.key == 'Escape') {
 
@@ -694,19 +712,19 @@
     var animated_parameters = 0;
 
     const default_config = {
-            'delay':                {value: 10, descr: 'Delay'},
-            'show_numbers':         {value: false, descr: 'Show numbers'},
-            'show_primes':          {value: false, descr: 'Show prime numbers'},
-            'show_primes_rays':     {value: false, descr: 'Prime rays from the center'},
-            'ray_width':            {value: 10, descr: 'Width of the prime rays'},
-            'relative_line_width':   {value: false, descr: 'Relative line width'},
-            'fading_line':          {value: false, descr: 'Fade out lines'},
-            'prime_outline_color':  {value: '#ff0000', descr: 'Prime arc outline color'},
-            'prime_fill_color':     {value: '#bb9999', descr: 'Prime arc fill color'},
-            'fading_fill_color':    {value: false, descr: 'Fill color fades out'},
-            'general_outline_color': {value: '#353535', descr: 'General outline color'},
-            'general_fill_color':   {value: '', descr: 'General fill color'},
-            'scale':                {value: 1, descr: 'Resolution scale'}
+            'delay':                    {value: 10, descr: 'Delay'},
+            'show_numbers':             {value: false, descr: 'Show numbers'},
+            'show_primes':              {value: false, descr: 'Show prime numbers'},
+            'show_primes_rays':         {value: false, descr: 'Prime rays from the center'},
+            'ray_width':                {value: 10, descr: 'Width of the prime rays'},
+            'relative_line_width':      {value: false, descr: 'Relative line width'},
+            'fading_line':              {value: false, descr: 'Fade out lines'},
+            'prime_outline_color':      {value: '#ff0000', descr: 'Prime arc outline color'},
+            'prime_fill_color':         {value: '#bb9999', descr: 'Prime arc fill color'},
+            'fading_fill_color':        {value: false, descr: 'Fill color fades out'},
+            'general_outline_color':    {value: '#353535', descr: 'General outline color'},
+            'general_fill_color':       {value: '', descr: 'General fill color'},
+            'scale':                    {value: 1, descr: 'Resolution scale'}
         }
 
     const default_parameters = {
