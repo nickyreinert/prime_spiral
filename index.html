@@ -830,13 +830,13 @@
             'show_numbers':             {group: "B", value: false, descr: 'Show numbers'},
             'show_primes':              {group: "B", value: false, descr: 'Show prime numbers'},
             'show_primes_rays':         {group: "C", value: false, descr: 'Prime rays from the center'},
-            'ray_width':                {group: "C", value: 10, descr: 'Width of the prime rays'},
+            'ray_width':                {group: "C", value: 100, descr: 'Width of the prime rays'},
             'relative_line_width':      {group: "D", value: false, descr: 'Relative line width'},
             'fading_line':              {group: "D", value: false, descr: 'Fade out lines'},
-            'prime_outline_color':      {group: "D", value: '#ff0000', descr: 'Prime arc outline color'},
-            'prime_fill_color':         {group: "E", value: '#bb9999', descr: 'Prime arc fill color'},
+            'prime_outline_color':      {group: "D", value: '#abcabc', descr: 'Prime arc outline color'},
+            'prime_fill_color':         {group: "E", value: '#defdef', descr: 'Prime arc fill color'},
             'fading_fill_color':        {group: "E", value: false, descr: 'Fill color fades out'},
-            'general_outline_color':    {group: "F", value: '#353535', descr: 'General outline color'},
+            'general_outline_color':    {group: "F", value: '#456456', descr: 'General outline color'},
             'general_fill_color':       {group: "F", value: '', descr: 'General fill color'}
         }
  
@@ -847,7 +847,7 @@
         rotation:       {value: 0, min: -90, max: 90, step: 0.1, descr: 'Rotation', type: 'float', animate: false, direction: 'inc'},
         a:              {value: 100, min: 0, max: 5, step: 0.01, descr: 'Slope', type: 'float', animate: true, direction: 'inc'},
         b:              {value: 5, min: 0, max: 10, step: 0.01, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
-        pidivisor:       {value: 180, min: 0, max: 360, step: 1, descr: 'divide PI by', type: 'int', animate: true, direction: 'inc'},
+        pidivisor:       {value: 3.1428, min: 0, max: 360, step: 3.1428, descr: 'divide PI by', type: 'float', animate: false, direction: 'inc'},
         diam:           {value: 180, min: 0, max: 360, step: 1, descr: 'Main Diameter', type: 'int', animate: true, direction: 'inc'},
         markerdiam:     {value: 3, min: 1, max: 100, step: 1, descr: 'Marker-Diameter', type: 'int', animate: false, direction: 'inc'}
     }
