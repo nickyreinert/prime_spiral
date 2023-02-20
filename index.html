@@ -422,49 +422,68 @@
 
         }
 
-        var canvas_container = document.getElementById('canvas');
-        var context_container = canvas_container.getContext('2d');
-
+        // init main canvas container
         var screenWidth = window.innerWidth;
         var screenHeight = window.innerHeight;
 
-        var canvas_dots = document.createElement('canvas');
-        var context_dots = canvas_dots.getContext('2d');
-
-        var canvas_lines = document.createElement('canvas');
-        var context_lines = canvas_lines.getContext("2d");
+        var canvas_container = document.getElementById('canvas');
+        var context_container = canvas_container.getContext('2d');
 
         canvas_container.style.width = screenWidth + 'px';
         canvas_container.style.height = screenHeight + 'px';
         canvas_container.width = screenWidth * parseInt(config.scale.value);
         canvas_container.height = screenHeight * parseInt(config.scale.value);
-
-        canvas_lines.width = screenWidth * parseInt(config.scale.value);
-        canvas_lines.height = screenHeight * parseInt(config.scale.value);
-        canvas_dots.width = screenWidth * parseInt(config.scale.value);
-        canvas_dots.height = screenHeight * parseInt(config.scale.value);
-
         context_container.clearRect(0, 0, screenWidth, screenHeight);
-        // domCanvas.width += 0; 
-        context_lines.clearRect(0, 0, screenWidth, screenHeight);
-        context_dots.clearRect(0, 0, screenWidth, screenHeight);
 
-        context_dots.globalAlpha = 0.5;
+        // init additional canvas layers
+        var canvases = {};
+        var contexts = {};
+        var visuals = ['lines', 'rays', 'dots'];
+
+        for (visual in visuals) {
+                
+            canvases[visuals[visual]] = document.createElement('canvas');
+            contexts[visuals[visual]] = canvases[visuals[visual]].getContext('2d');
+
+            canvases[visuals[visual]].width = screenWidth * parseInt(config.scale.value);
+            canvases[visuals[visual]].height = screenHeight * parseInt(config.scale.value);
+
+            contexts[visuals[visual]].clearRect(0, 0, screenWidth, screenHeight);
+
+        }
+
+        // var canvas_dots = document.createElement('canvas');
+        // var context_dots = canvas_dots.getContext('2d');
+
+        // var canvas_lines = document.createElement('canvas');
+        // var context_lines = canvas_lines.getContext("2d");
+
+        // var canvas_rays = document.createElement('canvas');
+        // var context_rays = canvas_lines.getContext("2d");
+
+        // canvas_lines.width = screenWidth * parseInt(config.scale.value);
+        // canvas_lines.height = screenHeight * parseInt(config.scale.value);
+        // canvas_dots.width = screenWidth * parseInt(config.scale.value);
+        // canvas_dots.height = screenHeight * parseInt(config.scale.value);
+
+        // domCanvas.width += 0; 
+
+        // context_dots.globalAlpha = 0.5;
 
         num = 2;
 
-        var centerx = context_lines.canvas.width / 2;
-        var centery = context_lines.canvas.height / 2;
+        var centerx = contexts['lines'].canvas.width / 2;
+        var centery = contexts['lines'].canvas.height / 2;
 
-        context_lines.moveTo(centerx, centery);
-        context_lines.beginPath();
+        contexts['lines'].moveTo(centerx, centery);
+        contexts['lines'].beginPath();
 
         max_ray_width = parameters.range.value;
 
-        context_dots.lineWidth = 5;
+        contexts['dots'].lineWidth = 5;
 
         prime_fill_color_rgb = hexToRgb(config.prime_fill_color.value);
-        context_dots.lineCap = "round";
+        contexts['dots'].lineCap = "round";
 
         for (i = 0; i < parseInt(parameters.range.value); i++) {
 
@@ -472,7 +491,7 @@
 
             if (config.relative_line_width.value == true) {
                 
-                context_dots.lineWidth = 100 - parseInt(100 * i / max_ray_width);
+                contexts['dots'].lineWidth = 100 - parseInt(100 * i / max_ray_width);
 
             }
 
@@ -490,35 +509,36 @@
                 //     context_dots.stroke();
                 // }
 
-                drawArcs(x, y, context_dots);
+                drawArcs(x, y, contexts['dots']);
 
                 if (config.show_primes.value == true) {
-                    context_lines.fillText(num, x, y);
+                    contexts['lines'].fillText(num, x, y);
                 }
                 
             }
             
             if (config.show_numbers.value == true) {
-                context_lines.fillText(num, x + 5 , y + 5);
+                contexts['lines'].fillText(num, x + 5 , y + 5);
             } 
 
-            context_lines.lineTo(x, y);
+            contexts['lines'].lineTo(x, y);
             // context_lines.arc(x, y, 2, 0, 2 * Math.PI);
             // context_lines.fillText('angel: ' + parseInt(angle) + ', x: ' + parseInt(x) + ', y:' + parseInt(y), x, y);
 
         }
 
         if (config.general_fill_color.value.includes('#')) {
-            context_lines.fillStyle = config.general_fill_color.value;
-            context_lines.fill();
+            contexts['lines'].fillStyle = config.general_fill_color.value;
+            contexts['lines'].fill();
         }
         if (config.general_outline_color.value.includes('#')) {
-            context_lines.strokeStyle = config.general_outline_color.value;
-            context_lines.stroke();
+            contexts['lines'].strokeStyle = config.general_outline_color.value;
+            contexts['lines'].stroke();
         }
 
-        context_container.drawImage(canvas_lines, 0, 0);
-        context_container.drawImage(canvas_dots, 0, 0);
+        for (visual in visuals) {
+            context_container.drawImage(canvases[visuals[visual]], 0, 0);
+        }
 
     }
 
@@ -534,10 +554,11 @@
 
             if (config.fading_fill_color.value == true){
                 factor = Math.round((100 - Math.floor(100 * i / parameters.range.value))) / 100
-                context_dots.fillStyle = "rgb(" +
+                context_dots.fillStyle = "rgba(" +
                     Math.floor(prime_fill_color_rgb.r - prime_fill_color_rgb.r * factor) + "," +
                     Math.floor(prime_fill_color_rgb.g - prime_fill_color_rgb.g * factor) + "," +
-                    Math.floor(prime_fill_color_rgb.b - prime_fill_color_rgb.b * factor) + 
+                    Math.floor(prime_fill_color_rgb.b - prime_fill_color_rgb.b * factor) + "," +
+                    Math.floor(1) + 
                     ")";
 
             } else {
