@@ -183,31 +183,59 @@
 
     function showControls() {
 
+        addConfigControls();
+
         addParameterControls();
 
-        addConfigControls();
-        
     }
 
     function addConfigControls() {
         
+        current_group = '';
+
         for (const [key, value] of Object.entries(config)) {
 
-            var container = document.createElement('tr');
+            // add a new table row if its a new config-group
+            if (value.group != current_group) {
+
+                var container = document.createElement('tr');
+                container.innerHTML = '';
+
+            }
+            
             if (value.value === true || value.value === false) {
                 
                 if (value.value == true) {var checked = 'checked'} else {var checked = ''};
-                container.innerHTML = 
+
+                container.innerHTML += 
                     '<td><label " for="' + key + '" />' + value.descr + '</label></td>' + 
-                    '<td><input type="checkbox" size=3 ' + checked + ' " id="value_' + key + '" /></td>';
+                    '<td><input key="' + key + '" type="checkbox" size=3 ' + checked + ' " id="value_' + key + '" /></td>';
+
+            } else if (Array.isArray(value.value)) {
+
+                container.innerHTML +=
+                    '<td><label " for="' + key + '" />' + value.descr + '</label></td><td>'; 
+
+                for (const item of value.value) {
+                    
+                    if (item == value.selected) {checked = 'checked'} else {checked = ''}
+
+                    container.innerHTML +=
+                        '<input key="' + key + '" ' + checked + ' type="radio" size=8 value="' + item + '" name="' + key + '" id="value_' + key + '_' + item + '">' + item + '</input';
+
+                }
+
+                container.innerHTML += '</td>';
 
             } else {
 
-                container.innerHTML =
+                container.innerHTML +=
                     '<td><label " for="' + key + '" />' + value.descr + '</label></td>' + 
-                    '<td><input type="text" size=8 value="' + value.value + '" id="value_' + key + '" /></td>';
+                    '<td><input key="' + key + '" type="text" size=8 value="' + value.value + '" id="value_' + key + '" /></td>';
 
             }
+
+            current_group = value.group;
 
             document.getElementById('parameters_container').appendChild(container);
 
@@ -253,33 +281,46 @@
     
     function registerParameterControls() {
 
+        // register on click events for the config controls
         for (const [key, value] of Object.entries(config)) {
 
-            let current_control = document.querySelector('#value_' + key);
-
+            // if its a checkbox
             if (value.value === true ||value.value === false) {
 
-                current_control.onclick = function(event) {
+                document.querySelector('#value_' + key).onclick = function(event) {
                     
-                    let parameter_and_setting = event.target.getAttribute('id');
-                    let setting = parameter_and_setting.split('_')[0];
-                    let name= parameter_and_setting.replace('value_', '');
+                    let current_key = event.target.getAttribute('key');
                     
-                    window.config[name]['value'] = event.target.checked;
+                    window.config[current_key]['value'] = event.target.checked;
                     
                     controlAnimation();
 
                 }
 
+            // if its a radio button
+            } else if (Array.isArray(value.value)) {
+
+                for (const item of value.value) {
+                    
+                    document.querySelector('#value_' + key + '_' + item).onclick = function(event) {
+                        
+                        let current_key = event.target.getAttribute('key');
+                        
+                        window.config[current_key]['selected'] = event.target.value;
+                        
+                        controlAnimation();
+                        
+                    }
+                }
+
+            // if its a text input
             } else {
 
-                current_control.addEventListener('input', (event) => {
+                document.querySelector('#value_' + key).addEventListener('input', (event) => {
 
-                    let parameter_and_setting = event.target.getAttribute('id');
-                    let setting = parameter_and_setting.split('_')[0];
-                    let name= parameter_and_setting.replace('value_', '');
+                    let current_key = event.target.getAttribute('key');
                     
-                    window.config[name]['value'] = event.target.value;
+                    window.config[current_key]['value'] = event.target.value;
 
                     controlAnimation();
 
@@ -426,7 +467,7 @@
     }
 
     function drawSpiral() {
-        
+                
         for (const [key, attributes] of Object.entries(parameters)) {
 
             document.querySelector('#slider_' + key).value = attributes.value;
@@ -481,20 +522,19 @@
 
         contexts['dots'].lineCap = "round";
 
+        var coordinates = {x: 0, y: 0};
+
         for (i = 0; i < parseInt(parameters.range.value); i++) {
 
             num = num + 1;
 
-            angle = (parseFloat((parameters.smoother.value)) * i) + parseFloat(parameters.rotation.value)
-            x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.tan(angle);
-            y = centery + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * Math.cos(angle);
-
-
+            coordinates= calculateXandY(centerx, centery, i);
+            
             if (numberIsPrime(num)) {
 
-                drawArcs(x, y, contexts['dots']);
+                drawArcs(coordinates.x, coordinates.y, contexts['dots']);
 
-                drawRays(x, y, centerx, centery, contexts['rays']);
+                drawRays(coordinates.x, coordinates.y, centerx, centery, contexts['rays']);
 
                 if (config.show_primes.value == true) {
                     contexts['lines'].fillText(num, x, y);
@@ -506,7 +546,7 @@
                 contexts['lines'].fillText(num, x + 5 , y + 5);
             } 
 
-            contexts['lines'].lineTo(x, y);
+            contexts['lines'].lineTo(coordinates.x, coordinates.y);
             // context_lines.arc(x, y, 2, 0, 2 * Math.PI);
             // context_lines.fillText('angel: ' + parseInt(angle) + ', x: ' + parseInt(x) + ', y:' + parseInt(y), x, y);
 
@@ -525,6 +565,30 @@
             context_container.drawImage(canvases[visuals[visual]], 0, 0);
         }
 
+    }
+
+    function calculateAngle(angle_function, angle) {
+
+        switch (angle_function) {
+            case 'cos':
+                return Math.cos(angle);
+            case 'tan':
+                return Math.tan(angle);
+            case 'sin':
+                return Math.sin(angle);
+        }
+
+    }
+
+    function calculateXandY(centerx, centery, i) {
+
+        angle = (parseFloat((parameters.smoother.value)) * i) + parseFloat(parameters.rotation.value);
+        
+        x = centerx + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * calculateAngle(config.x_angle.selected, angle);
+
+        y = centery + (parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) * calculateAngle(config.y_angle.selected, angle);
+
+        return {x: x, y: y};
     }
 
     function drawRays(x, y, centerx, centery, context) {
@@ -725,18 +789,20 @@
 
     const default_config = {
             'delay':                    {group: "A", value: 10, descr: 'Delay'},
+            'scale':                    {group: "A", value: 1, descr: 'Resolution scale'},
+            'x_angle':                  {group: "AA", value: ['cos', 'sin', 'tan'], selected: 'cos', descr: 'Calculate X angle by'},
+            'y_angle':                  {group: "AA", value: ['cos', 'sin', 'tan'], selected: 'sin', descr: 'Calculate Y angle by'},
             'show_numbers':             {group: "B", value: false, descr: 'Show numbers'},
             'show_primes':              {group: "B", value: false, descr: 'Show prime numbers'},
             'show_primes_rays':         {group: "C", value: false, descr: 'Prime rays from the center'},
             'ray_width':                {group: "C", value: 10, descr: 'Width of the prime rays'},
-            'relative_line_width':      {group: "C", value: false, descr: 'Relative line width'},
-            'fading_line':              {group: "C", value: false, descr: 'Fade out lines'},
-            'prime_outline_color':      {group: "C", value: '#ff0000', descr: 'Prime arc outline color'},
-            'prime_fill_color':         {group: "C", value: '#bb9999', descr: 'Prime arc fill color'},
-            'fading_fill_color':        {group: "C", value: false, descr: 'Fill color fades out'},
-            'general_outline_color':    {group: "C", value: '#353535', descr: 'General outline color'},
-            'general_fill_color':       {group: "C", value: '', descr: 'General fill color'},
-            'scale':                    {group: "C", value: 1, descr: 'Resolution scale'}
+            'relative_line_width':      {group: "D", value: false, descr: 'Relative line width'},
+            'fading_line':              {group: "D", value: false, descr: 'Fade out lines'},
+            'prime_outline_color':      {group: "D", value: '#ff0000', descr: 'Prime arc outline color'},
+            'prime_fill_color':         {group: "E", value: '#bb9999', descr: 'Prime arc fill color'},
+            'fading_fill_color':        {group: "E", value: false, descr: 'Fill color fades out'},
+            'general_outline_color':    {group: "F", value: '#353535', descr: 'General outline color'},
+            'general_fill_color':       {group: "F", value: '', descr: 'General fill color'}
         }
 
     const default_parameters = {
