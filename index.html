@@ -542,15 +542,16 @@
 
         contexts['lines'].moveTo(centerx, centery);
         contexts['lines'].beginPath();
-
-        contexts['dots'].lineWidth = 5;
-
+        
         prime_fill_color_rgb = hexToRgb(config.prime_fill_color.value);
         prime_line_color_rgb = hexToRgb(config.prime_outline_color.value);
-
+        
+        contexts['dots'].lineWidth = 5;
         contexts['dots'].lineCap = "round";
 
         var coordinates = {x: 0, y: 0};
+
+        var previous_x = 0, previous_y = 0;
 
         for (i = 0; i < parseInt(parameters.range.value); i++) {
 
@@ -590,7 +591,18 @@
 
             }
 
-            contexts['lines'].lineTo(coordinates.x, coordinates.y);
+            if (config.show_beziers.value == true && i > 1) {
+                
+                contexts['lines'].bezierCurveTo(centerx, centery, previous_x, previous_y, coordinates.x, coordinates.y);
+
+            } else {
+
+                contexts['lines'].lineTo(coordinates.x, coordinates.y);
+
+            }
+
+            previous_x = coordinates.x;
+            previous_y = coordinates.y;
 
             // context_lines.arc(x, y, 2, 0, 2 * Math.PI);
             // context_lines.fillText('angel: ' + parseInt(angle) + ', x: ' + parseInt(x) + ', y:' + parseInt(y), x, y);
@@ -908,6 +920,7 @@
             'show_primes':              {group: "B", value: false, descr: 'Show prime numbers'},
             'show_number_arcs':         {group: "BB", value: false, descr: 'Show arcs around non-primes'},
             'show_primes_arcs':         {group: "BB", value: false, descr: 'Show arcs around prime numbers'},
+            'show_beziers':             {group: "C", value: false, descr: 'Use bezier curves'},
             'show_primes_rays':         {group: "C", value: false, descr: 'Prime rays from the center'},
             'ray_width':                {group: "C", value: 100, descr: 'Width of the prime rays'},
             'relative_line_width':      {group: "D", value: false, descr: 'Relative line width'},
