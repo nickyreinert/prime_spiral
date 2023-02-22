@@ -41,6 +41,7 @@
   <body>
     
     <div id="slider_container" class="slider_container">
+        <!-- <input type="button" id="audio" value="audio" onClick="enableAudio();" /> -->
         <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
         <input type="button" id="export" value="Export" onClick="exportParameters();" />
         <input type="button" id="hide" value="Hide (Enter)" onClick="showHideControls();" />
@@ -475,6 +476,24 @@
         element.style.height = screenHeight + "px";
     }
 
+    // function enableAudio() {
+  
+    //     console.log('enable audio');
+    //     var context = new AudioContext();
+    //     o = context.createOscillator()
+    //     g = context.createGain()
+    //     o.type = 'triangle';
+    //     o.connect(g)
+    //     o.frequency.value = 87.31;
+    //     g.connect(context.destination)
+    //     o.start(0)
+
+    //     g.gain.exponentialRampToValueAtTime(
+    //         0.00001, context.currentTime + 1
+    //     )
+
+    // }
+
     function drawSpiral() {
                 
         for (const [key, attributes] of Object.entries(parameters)) {
@@ -537,7 +556,7 @@
 
             num = num + 1;
 
-            coordinates= calculateXandY(centerx, centery, i);
+            coordinates = calculateXandY(centerx, centery, i);
             
             if (numberIsPrime(num)) {
 
@@ -551,6 +570,7 @@
                 
             }
             
+
             if (config.show_numbers.value == true) {
                 contexts['lines'].fillText(num, x + 5 , y + 5);
             } 
@@ -591,14 +611,44 @@
 
     function calculateXandY(centerx, centery, i) {
 
-        angle = (parseFloat((parameters.smoother.value)) * i) + parseFloat(parameters.rotation.value);
         
         // how to draw a circle:
         // var x = center_x + radius * distance * Math.cos(-angle*Math.PI/180);
         // how to draw a spiral:
-        x = centerx + ((parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) + parseInt(parameters.diam.value)) * calculateAngle(config.x_angle.selected, angle * Math.PI/parameters.pidivisor.value);
+        
+        let angle = (parseFloat((parameters.smoother.value)) * i) + parseFloat(parameters.rotation.value);
 
-        y = centery + ((parseInt(parameters.a.value) + parseFloat(parameters.b.value) * angle) + parseInt(parameters.diam.value)) * calculateAngle(config.y_angle.selected, angle * Math.PI/parameters.pidivisor.value);
+        let slope = parseInt(parameters.a.value);
+        let intercept = parseFloat(parameters.b.value);
+        let diam = parseInt(parameters.diam.value)
+        let x_angle = calculateAngle(config.x_angle.selected, angle * Math.PI/parameters.pidivisor.value);
+        let y_angle = calculateAngle(config.y_angle.selected, angle * Math.PI/parameters.pidivisor.value);
+        
+        if (config.center.value == false) {
+
+            centerx = 0;
+            centery = 0;
+
+        }
+        if (config.distortion.value == true) {
+
+            distortion = i;
+
+        } else {
+
+            distortion = 1;
+        }
+
+        if (config.power.value == true) {
+
+            x_angle *= x_angle;
+            y_angle *= y_angle;
+
+        }
+
+        x = centerx + (distortion * ((slope + intercept * angle) + diam) * x_angle);
+
+        y = centery + (distortion * ((slope + intercept * angle) + diam) * y_angle);
 
         return {x: x, y: y};
     }
@@ -630,7 +680,15 @@
             
             context.beginPath();
 
-            context.moveTo(centerx, centery);
+            if (config.center.value == true) {
+    
+                context.moveTo(centerx, centery);
+            
+            } else {
+    
+                context.moveTo(0, 0);
+    
+            }
             
             context.lineTo(x, y);
 
@@ -827,6 +885,9 @@
             'scale':                    {group: "AA", value: 1, descr: 'Resolution scale'},
             'x_angle':                  {group: "AAA", value: ['cos', 'sin', 'tan'], selected: 'cos', descr: 'Calculate X angle by'},
             'y_angle':                  {group: "AAA", value: ['cos', 'sin', 'tan'], selected: 'sin', descr: 'Calculate Y angle by'},
+            'center':                   {group: "AAAA", value: true, descr: 'Start at center'},
+            'distortion':               {group: "AAAA", value: false, descr: 'Activate distortion'},
+            'power':                    {group: "AAAA", value: false, descr: 'Power by 2 for angle calculation'},
             'show_numbers':             {group: "B", value: false, descr: 'Show numbers'},
             'show_primes':              {group: "B", value: false, descr: 'Show prime numbers'},
             'show_primes_rays':         {group: "C", value: false, descr: 'Prime rays from the center'},
@@ -847,7 +908,7 @@
         rotation:       {value: 0, min: -90, max: 90, step: 0.1, descr: 'Rotation', type: 'float', animate: false, direction: 'inc'},
         a:              {value: 100, min: 0, max: 5, step: 0.01, descr: 'Slope', type: 'float', animate: true, direction: 'inc'},
         b:              {value: 5, min: 0, max: 10, step: 0.01, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
-        pidivisor:       {value: 3.1428, min: 0, max: 360, step: 3.1428, descr: 'divide PI by', type: 'float', animate: false, direction: 'inc'},
+        pidivisor:       {value: 3.1428, min: 3.1428, max: 360, step: 3.1428, descr: 'divide PI by', type: 'float', animate: false, direction: 'inc'},
         diam:           {value: 180, min: 0, max: 360, step: 1, descr: 'Main Diameter', type: 'int', animate: true, direction: 'inc'},
         markerdiam:     {value: 3, min: 1, max: 100, step: 1, descr: 'Marker-Diameter', type: 'int', animate: false, direction: 'inc'}
     }
