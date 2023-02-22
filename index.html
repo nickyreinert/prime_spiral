@@ -560,7 +560,11 @@
             
             if (numberIsPrime(num)) {
 
-                drawArcs(coordinates.x, coordinates.y, contexts['dots']);
+                if (config.show_primes_arcs.value == true) {
+
+                    drawArcs(coordinates.x, coordinates.y, contexts['dots']);
+
+                }
 
                 drawRays(coordinates.x, coordinates.y, centerx, centery, contexts['rays']);
 
@@ -568,14 +572,26 @@
                     contexts['lines'].fillText(num, x, y);
                 }
                 
-            }
-            
+            // not a prime, draw arcs and text
+            } else {
 
-            if (config.show_numbers.value == true) {
-                contexts['lines'].fillText(num, x + 5 , y + 5);
-            } 
+
+                if (config.show_number_arcs.value == true) {
+
+                    drawArcs(coordinates.x, coordinates.y, contexts['dots']);
+
+                }
+
+                if (config.show_numbers.value == true) {
+                
+                    contexts['lines'].fillText(num, coordinates.x + 5 , coordinates.y + 5);
+
+                } 
+
+            }
 
             contexts['lines'].lineTo(coordinates.x, coordinates.y);
+
             // context_lines.arc(x, y, 2, 0, 2 * Math.PI);
             // context_lines.fillText('angel: ' + parseInt(angle) + ', x: ' + parseInt(x) + ', y:' + parseInt(y), x, y);
 
@@ -890,6 +906,8 @@
             'power':                    {group: "AAAA", value: false, descr: 'Power by 2 for angle calculation'},
             'show_numbers':             {group: "B", value: false, descr: 'Show numbers'},
             'show_primes':              {group: "B", value: false, descr: 'Show prime numbers'},
+            'show_number_arcs':         {group: "BB", value: false, descr: 'Show arcs around non-primes'},
+            'show_primes_arcs':         {group: "BB", value: false, descr: 'Show arcs around prime numbers'},
             'show_primes_rays':         {group: "C", value: false, descr: 'Prime rays from the center'},
             'ray_width':                {group: "C", value: 100, descr: 'Width of the prime rays'},
             'relative_line_width':      {group: "D", value: false, descr: 'Relative line width'},
