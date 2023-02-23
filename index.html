@@ -563,7 +563,7 @@
 
                 if (config.show_primes_arcs.value == true) {
 
-                    drawArcs(coordinates.x, coordinates.y, contexts['dots']);
+                    drawArcs(coordinates.x, coordinates.y, contexts['dots'], num);
 
                 }
 
@@ -579,7 +579,7 @@
 
                 if (config.show_number_arcs.value == true) {
 
-                    drawArcs(coordinates.x, coordinates.y, contexts['dots']);
+                    drawArcs(coordinates.x, coordinates.y, contexts['dots'], num);
 
                 }
 
@@ -684,7 +684,7 @@
     function drawRays(x, y, centerx, centery, context) {
 
         if (config.show_primes_rays.value == true) {
-            
+
             context.lineWidth = parseInt(config.ray_width.value);
             context.strokeStyle = config.prime_outline_color.value;
 
@@ -726,12 +726,25 @@
 
     }
     
-    function drawArcs(x, y, context_dots) {
+    function drawArcs(x, y, context_dots, num) {
 
         context_dots.beginPath();
+        let scale_factor = 1;
+        if (config.scale_diameter.value == true) {
+
+            scale_factor = Math.pow((1 + (num / window.parameters.range.value)), 3);
+
+        } else {
+
+            scale_factor = 1;
+
+        }
+
+        // scale the size of the arc based on the distance to the center
+        diameter = parseFloat(scale_factor * parameters.markerdiam.value);
 
         // set position
-        context_dots.arc(x, y, parseInt(parameters.markerdiam.value), 0, 2 * Math.PI);
+        context_dots.arc(x, y, diameter, 0, 2 * Math.PI);
         
         // fill the arc
         if (config.prime_fill_color.value.includes('#')) {
@@ -758,7 +771,20 @@
         // draw outline
         if (config.prime_outline_color.value.includes('#')) {
 
-            context_dots.strokeStyle = config.prime_outline_color.value;
+            if (config.fading_fill_color.value == true){
+                factor = Math.round((100 - Math.floor(100 * i / parameters.range.value))) / 100
+                context_dots.strokeStyle = "rgba(" +
+                    Math.floor(prime_line_color_rgb.r) + "," +
+                    Math.floor(prime_line_color_rgb.g) + "," +
+                    Math.floor(prime_line_color_rgb.b) + "," +
+                    parseFloat(factor) + 
+                    ")";
+
+            } else {
+
+                context_dots.strokeStyle = config.prime_outline_color.value;
+
+            }
             context_dots.stroke();
             
         }
@@ -922,12 +948,13 @@
             'show_primes_arcs':         {group: "BB", value: true, descr: 'Show arcs around prime numbers'},
             'show_beziers':             {group: "C", value: false, descr: 'Use bezier curves'},
             'show_primes_rays':         {group: "C", value: false, descr: 'Prime rays from the center'},
-            'ray_width':                {group: "C", value: 100, descr: 'Width of the prime rays'},
-            'relative_line_width':      {group: "D", value: false, descr: 'Relative line width'},
-            'fading_line':              {group: "D", value: false, descr: 'Fade out lines'},
+            'ray_width':                {group: "C", value: 100, descr: 'Prime rays width'},
+            'relative_line_width':      {group: "D", value: false, descr: 'Prime rays with relative width'},
+            'fading_line':              {group: "D", value: false, descr: 'Prime rays fade out'},
             'prime_outline_color':      {group: "D", value: '#abcabc', descr: 'Prime arc outline color'},
             'prime_fill_color':         {group: "E", value: '#defdef', descr: 'Prime arc fill color'},
-            'fading_fill_color':        {group: "E", value: false, descr: 'Fill color fades out'},
+            'fading_fill_color':        {group: "E", value: false, descr: 'Fade out arcs'},
+            'scale_diameter':           {group: "E", value: false, descr: 'Scale arc diameter'},
             'general_outline_color':    {group: "F", value: '#456456', descr: 'General outline color'},
             'general_fill_color':       {group: "F", value: '', descr: 'General fill color'}
         }
