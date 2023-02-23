@@ -905,14 +905,18 @@
 
     function showHideControls() {
 
-        let settings_container = document.querySelector('.settings_container');
+        let settings_container = document.querySelectorAll('.settings_container');
 
-        if (settings_container.style.display == 'none') {
-            settings_container.style.display = 'block';
+        settings_container.forEach(function(element) {
+            if (element.style.display == 'none') {
+                
+                element.style.display = 'block';
 
-        } else {
-            settings_container.style.display = 'none';
-        }
+            } else {
+
+                element.style.display = 'none';
+            }
+        });
 
     }
 
