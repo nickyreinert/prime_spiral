@@ -29,8 +29,10 @@
 
       }
 
-      .slider_container {
+      .controller_container {
         width: auto;
+        height: 100%;
+        overflow: auto;
         position: fixed;
         z-index: 1000;
         background-color: #fff;
@@ -40,7 +42,7 @@
   </head>
   <body>
     
-    <div id="slider_container" class="slider_container">
+    <div id="controller_container" class="controller_container">
         <!-- <input type="button" id="audio" value="audio" onClick="enableAudio();" /> -->
         <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
         <input type="button" id="export" value="Export" onClick="exportParameters();" />
@@ -49,8 +51,8 @@
         <input type="checkbox" id="animate" />
         <input type="range" min=25 max=100 step=25 value=75 id="overlay_alpha" onClick="adjustOverlayAlpha();" />
         <a href="https://github.com/nickyreinert/prime_spiral" id="doc" target="_blank">Source & Documentation</a>
-        <table id="parameters_container">
-        </table>    
+        <table class="settings_container" id="config_container"></table>    
+        <table class="settings_container" id="parameters_container"></table>    
     </div>    
 
     <div id="container">
@@ -61,18 +63,24 @@
 
     function adjustOverlayAlpha() {
 
-        let parameters_container = document.querySelector('#slider_container');
+        let controller_container = document.querySelector('.controller_container');
 
-        parameters_container.style.opacity = document.querySelector('#overlay_alpha').value / 100;
+        controller_container.style.opacity = document.querySelector('#overlay_alpha').value / 100;
 
     }
     
     function resetParameters() {
         
-        document.getElementById('parameters_container').remove();
+        document.querySelectorAll('.settings_container').remove();
         var parameters_container = document.createElement('table');
         parameters_container.id = 'parameters_container';
-        document.getElementById('slider_container').appendChild(parameters_container);
+        parameters_container.className = 'settings_container';
+        document.getElementById('controller_container').appendChild(parameters_container);
+
+        var config_container = document.createElement('table');
+        config_container.id = 'config_container';
+        config_container.className = 'config_container';
+        document.getElementById('controller_container').appendChild(config_container);
 
         window.parameters = JSON.parse(JSON.stringify(default_parameters));
         window.config = JSON.parse(JSON.stringify(default_config));
@@ -207,16 +215,33 @@
 
     function addConfigControls() {
         
+        current_section = '';
         current_group = '';
 
         for (const [key, value] of Object.entries(config)) {
 
-            // add a new table row if its a new config-group
-            if (value.group != current_group) {
+            // add a new table row if its a new config-section
+            if (value.section != current_section) {
 
+                var separator = document.createElement('tr');
+                separator.className = 'section_separator';
+                separator.innerHTML = '<td>' + value.section + '</td>';
+                separator.innerHTML += '<td colspan=6><hr /></td>';
+                document.getElementById('config_container').appendChild(separator);
                 var container = document.createElement('tr');
                 container.innerHTML = '';
+            
+            // same section
+            } else {
+                
+                // but new group? add a new row
+                if (value.group != current_group) {
+                    
+                    var container = document.createElement('tr');
+                    container.innerHTML = '';
 
+                }
+                
             }
             
             if (value.value === true || value.value === false) {
@@ -251,9 +276,10 @@
 
             }
 
+            current_section = value.section;
             current_group = value.group;
 
-            document.getElementById('parameters_container').appendChild(container);
+            document.getElementById('config_container').appendChild(container);
 
         }
 
@@ -879,12 +905,13 @@
 
     function showHideControls() {
 
-        let parameters_container = document.querySelector('#parameters_container');
+        let settings_container = document.querySelector('.settings_container');
 
-        if (parameters_container.style.display == 'none') {
-            parameters_container.style.display = 'block';
+        if (settings_container.style.display == 'none') {
+            settings_container.style.display = 'block';
+
         } else {
-            parameters_container.style.display = 'none';
+            settings_container.style.display = 'none';
         }
 
     }
@@ -941,28 +968,28 @@
     var animated_parameters = 0;
 
     const default_config = {
-            'delay':                    {group: "AA", value: 10, descr: 'Delay'},
-            'scale':                    {group: "AA", value: 1, descr: 'Resolution scale'},
-            'x_angle':                  {group: "AAA", value: ['cos', 'sin', 'tan'], selected: 'cos', descr: 'Calculate X angle by'},
-            'y_angle':                  {group: "AAA", value: ['cos', 'sin', 'tan'], selected: 'sin', descr: 'Calculate Y angle by'},
-            'center':                   {group: "AAAA", value: true, descr: 'Start at center'},
-            'distortion':               {group: "AAAA", value: false, descr: 'Activate distortion'},
-            'power':                    {group: "AAAA", value: false, descr: 'Power by 2 for angle calculation'},
-            'show_numbers':             {group: "B", value: false, descr: 'Show numbers'},
-            'show_primes':              {group: "B", value: false, descr: 'Show prime numbers'},
-            'show_number_arcs':         {group: "BB", value: false, descr: 'Show arcs around non-primes'},
-            'show_primes_arcs':         {group: "BB", value: true, descr: 'Show arcs around prime numbers'},
-            'show_beziers':             {group: "C", value: false, descr: 'Use bezier curves'},
-            'show_primes_rays':         {group: "C", value: false, descr: 'Prime rays from the center'},
-            'ray_width':                {group: "C", value: 100, descr: 'Prime rays width'},
-            'relative_line_width':      {group: "D", value: false, descr: 'Prime rays with relative width'},
-            'fading_line':              {group: "D", value: false, descr: 'Prime rays fade out'},
-            'prime_outline_color':      {group: "D", value: '#abcabc', descr: 'Prime arc outline color'},
-            'prime_fill_color':         {group: "E", value: '#defdef', descr: 'Prime arc fill color'},
-            'fading_fill_color':        {group: "E", value: false, descr: 'Fade out arcs'},
-            'scale_diameter':           {group: "E", value: false, descr: 'Scale arc diameter'},
-            'general_outline_color':    {group: "F", value: '#456456', descr: 'General outline color'},
-            'general_fill_color':       {group: "F", value: '', descr: 'General fill color'}
+            'delay':                    {section: "Animation", group: "A", value: 10, descr: 'Delay'},
+            'scale':                    {section: "Animation", group: "A", value: 1, descr: 'Resolution scale'},
+            'x_angle':                  {section: "Angular Functions", group: "A", value: ['cos', 'sin', 'tan'], selected: 'cos', descr: 'Calculate X angle by'},
+            'y_angle':                  {section: "Angular Functions", group: "B", value: ['cos', 'sin', 'tan'], selected: 'sin', descr: 'Calculate Y angle by'},
+            'center':                   {section: "Misc", group: "A", value: true, descr: 'Start at center'},
+            'power':                    {section: "Misc", group: "A", value: false, descr: 'Power by 2 for angle calculation'},
+            'distortion':               {section: "Misc", group: "A", value: false, descr: 'Activate distortion'},
+            'show_numbers':             {section: "Numbers", group: "A", value: false, descr: 'Show numbers'},
+            'show_primes':              {section: "Numbers", group: "A", value: false, descr: 'Show prime numbers'},
+            'show_number_arcs':         {section: "Arcs", group: "A", value: false, descr: 'Show arcs around non-primes'},
+            'show_primes_arcs':         {section: "Arcs", group: "A", value: true, descr: 'Show arcs around prime numbers'},
+            'scale_diameter':           {section: "Arcs", group: "B", value: false, descr: 'Scale arc diameter'},
+            'show_beziers':             {section: "Lines", group: "A", value: false, descr: 'Use bezier curves'},
+            'show_primes_rays':         {section: "Lines", group: "B", value: false, descr: 'Prime rays from the center'},
+            'ray_width':                {section: "Lines", group: "B", value: 100, descr: 'Prime rays width'},
+            'relative_line_width':      {section: "Lines", group: "C", value: false, descr: 'Prime rays with relative width'},
+            'fading_line':              {section: "Lines", group: "C", value: false, descr: 'Prime rays fade out'},
+            'prime_outline_color':      {section: "Colors", group: "A", value: '#abcabc', descr: 'Prime arc outline color'},
+            'prime_fill_color':         {section: "Colors", group: "A", value: '#defdef', descr: 'Prime arc fill color'},
+            'general_outline_color':    {section: "Colors", group: "B", value: '#456456', descr: 'General outline color'},
+            'general_fill_color':       {section: "Colors", group: "B", value: '', descr: 'General fill color'},
+            'fading_fill_color':        {section: "Colors", group: "C", value: false, descr: 'Fade out arcs'}
         }
  
     // heads up, please do not use underscores for the attributes
@@ -972,7 +999,7 @@
         rotation:       {value: 0, min: -90, max: 90, step: 0.1, descr: 'Rotation', type: 'float', animate: false, direction: 'inc'},
         a:              {value: 100, min: 0, max: 5, step: 0.01, descr: 'Slope', type: 'float', animate: true, direction: 'inc'},
         b:              {value: 5, min: 0, max: 10, step: 0.01, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
-        pidivisor:       {value: 3.1428, min: 3.1428, max: 360, step: 3.1428, descr: 'divide PI by', type: 'float', animate: false, direction: 'inc'},
+        pidivisor:      {value: 3.1428, min: 3.1428, max: 360, step: 3.1428, descr: 'divide PI by', type: 'float', animate: false, direction: 'inc'},
         diam:           {value: 180, min: 0, max: 360, step: 1, descr: 'Main Diameter', type: 'int', animate: true, direction: 'inc'},
         markerdiam:     {value: 3, min: 1, max: 100, step: 1, descr: 'Marker-Diameter', type: 'int', animate: false, direction: 'inc'}
     }
