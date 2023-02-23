@@ -729,7 +729,7 @@
     function drawArcs(x, y, context_dots) {
 
         context_dots.beginPath();
-        
+
         // set position
         context_dots.arc(x, y, parseInt(parameters.markerdiam.value), 0, 2 * Math.PI);
         
@@ -739,10 +739,10 @@
             if (config.fading_fill_color.value == true){
                 factor = Math.round((100 - Math.floor(100 * i / parameters.range.value))) / 100
                 context_dots.fillStyle = "rgba(" +
-                    Math.floor(255 - prime_fill_color_rgb.r * factor) + "," +
-                    Math.floor(255 - prime_fill_color_rgb.g * factor) + "," +
-                    Math.floor(255 - prime_fill_color_rgb.b * factor) + "," +
-                    Math.floor(1) + 
+                    Math.floor(prime_fill_color_rgb.r) + "," +
+                    Math.floor(prime_fill_color_rgb.g) + "," +
+                    Math.floor(prime_fill_color_rgb.b) + "," +
+                    parseFloat(factor) + 
                     ")";
 
             } else {
@@ -919,7 +919,7 @@
             'show_numbers':             {group: "B", value: false, descr: 'Show numbers'},
             'show_primes':              {group: "B", value: false, descr: 'Show prime numbers'},
             'show_number_arcs':         {group: "BB", value: false, descr: 'Show arcs around non-primes'},
-            'show_primes_arcs':         {group: "BB", value: false, descr: 'Show arcs around prime numbers'},
+            'show_primes_arcs':         {group: "BB", value: true, descr: 'Show arcs around prime numbers'},
             'show_beziers':             {group: "C", value: false, descr: 'Use bezier curves'},
             'show_primes_rays':         {group: "C", value: false, descr: 'Prime rays from the center'},
             'ray_width':                {group: "C", value: 100, descr: 'Width of the prime rays'},
