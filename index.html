@@ -29,6 +29,21 @@
 
       }
 
+      .section_separator  {
+        background-color: #e0e0e0;
+      }
+
+      .section_content:hover, .section_content td:hover  {
+        background-color: #f0b0f0;
+      }
+
+      .settings_container {
+
+        margin: 10px;
+        margin-bottom: 30px;
+        
+      }
+
       .controller_container {
         width: auto;
         height: 100%;
@@ -227,10 +242,10 @@
 
                 var separator = document.createElement('tr');
                 separator.className = 'section_separator';
-                separator.innerHTML = '<td>' + value.section + '</td>';
-                separator.innerHTML += '<td colspan=6><hr /></td>';
+                separator.innerHTML = '<td colspan=7>' + value.section + '</td>';
                 document.getElementById('config_container').appendChild(separator);
                 var container = document.createElement('tr');
+                container.className = 'section_content';
                 container.innerHTML = '';
             
             // same section
@@ -240,6 +255,7 @@
                 if (value.group != current_group) {
                     
                     var container = document.createElement('tr');
+                    container.className = 'section_content';
                     container.innerHTML = '';
 
                 }
@@ -291,7 +307,8 @@
 
         }
 
-        document.getElementById('config_container').innerHTML += '<tr><td colspan=6><hr></td></tr>';
+        // document.getElementById('config_container').innerHTML += '<tr class="section_separator"><td colspan=7></td></tr>';
+
     }
     
     function addParameterControls() {
@@ -311,6 +328,8 @@
         for (const [key, value] of Object.entries(window.parameters)) {
 
             var container = document.createElement('tr');
+            container.className = 'section_content';
+
             if (value.animate == true) {var checked = 'checked'; animated_parameters += 1;} else {var checked = ''};
             container.innerHTML = '<td>' + value.descr + ': </td>' +
                 '<td><input type="text" size=3 value="' + value.value + '" id="value_' + key + '" /></td>' +
