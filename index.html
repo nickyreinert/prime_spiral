@@ -61,10 +61,6 @@
 
     <script>
 
-    // encrypt/decrypt function by https://gist.github.com/mr5z/d3b653ae9b82bb8c4c2501a06f3931c6
-    let d=b=>{a=e={},d=b.split(""),c=f=d[0],g=[c],h=o=256;for(b=1;b<d.length;b++)a=d[b].charCodeAt(0),a=h>a?d[b]:e[a]?e[a]:f+c,g.push(a),c=a.charAt(0),e[o]=f+c,o++,f=a;return g.join("")}
-    let e=c=>{x='charCodeAt',b=z={},f=c.split(""),d=[],a=f[0],g=256;for(b=1;b<f.length;b++)c=f[b],null!=z[a+c]?a+=c:(d.push(1<a.length?z[a]:a[x](0)),z[a+c]=g,g++,a=c);d.push(1<a.length?z[a]:a[x](0));for(b=0;b<d.length;b++)d[b]=String.fromCharCode(d[b]);return d.join("")}
-
     function adjustOverlayAlpha() {
 
         let controller_container = document.querySelector('.controller_container');
@@ -167,6 +163,9 @@
         const expires = "expires=" + date.toUTCString();
 
         // encrypt to cookie
+        // encrypt/decrypt function by https://gist.github.com/mr5z/d3b653ae9b82bb8c4c2501a06f3931c6
+        let e=c=>{x='charCodeAt',b=z={},f=c.split(""),d=[],a=f[0],g=256;for(b=1;b<f.length;b++)c=f[b],null!=z[a+c]?a+=c:(d.push(1<a.length?z[a]:a[x](0)),z[a+c]=g,g++,a=c);d.push(1<a.length?z[a]:a[x](0));for(b=0;b<d.length;b++)d[b]=String.fromCharCode(d[b]);return d.join("")}
+
         document.cookie = 'settings=' + e(escape(JSON.stringify({config: window.config, parameters: window.parameters}))) + '; SameSite=None; Secure; ' + expires;
 
     }
@@ -178,6 +177,9 @@
         let settings = getCookie('settings');
 
         try {
+
+            // encrypt/decrypt function by https://gist.github.com/mr5z/d3b653ae9b82bb8c4c2501a06f3931c6
+            let d=b=>{a=e={},d=b.split(""),c=f=d[0],g=[c],h=o=256;for(b=1;b<d.length;b++)a=d[b].charCodeAt(0),a=h>a?d[b]:e[a]?e[a]:f+c,g.push(a),c=a.charAt(0),e[o]=f+c,o++,f=a;return g.join("")}
 
             settings = JSON.parse(unescape(d(settings)));
 
@@ -597,6 +599,18 @@
             num = num + 1;
 
             coordinates = calculateXandY(centerx, centery, i);
+
+            if (config.eco.value == true && (coordinates.x < 0  || coordinates.y < 0 || 
+                coordinates.x > screenWidth || coordinates.y > screenHeight)) {
+                
+                contexts['lines'].moveTo(coordinates.x, coordinates.y);
+
+                previous_x = coordinates.x;
+                previous_y = coordinates.y;
+
+                continue;
+
+            }
             
             if (numberIsPrime(num)) {
 
@@ -718,6 +732,7 @@
         y = centery + (distortion * ((slope + intercept * angle) + diam) * y_angle);
 
         return {x: x, y: y};
+
     }
 
     function drawRays(x, y, centerx, centery, context) {
@@ -908,6 +923,7 @@
         }
         
         drawSpiral();
+
     }
 
     function showHideControls() {
@@ -983,6 +999,7 @@
     const default_config = {
             'delay':                    {section: "Animation", group: "A", value: 10, descr: 'Delay'},
             'scale':                    {section: "Animation", group: "A", value: 1, descr: 'Resolution scale'},
+            'eco':                      {section: "Animation", group: "A", value: false, descr: 'Do not draw outside the canvas'},
             'x_angle':                  {section: "Angular Functions", group: "A", value: ['cos', 'sin', 'tan'], selected: 'cos', descr: 'Calculate X angle by'},
             'y_angle':                  {section: "Angular Functions", group: "B", value: ['cos', 'sin', 'tan'], selected: 'sin', descr: 'Calculate Y angle by'},
             'center':                   {section: "Misc", group: "A", value: true, descr: 'Start at center'},
