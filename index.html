@@ -179,7 +179,7 @@
 
         try {
 
-            settings = JSON.parse(unescape(settings));
+            settings = JSON.parse(unescape(d(settings)));
 
             parameters = settings.parameters;
             config = settings.config;
