@@ -66,6 +66,7 @@
         <input type="checkbox" id="animate" />
         <input type="range" min=25 max=100 step=25 value=75 id="overlay_alpha" onClick="adjustOverlayAlpha();" />
         <a href="https://github.com/nickyreinert/prime_spiral" id="doc" target="_blank">Source & Documentation</a>
+        <p id="cpu_usage"></p>
         <table class="settings_container" id="config_container"></table>    
         <table class="settings_container" id="parameters_container"></table>    
     </div>    
@@ -550,6 +551,8 @@
 
     function drawSpiral() {
                 
+        var start_time = performance.now();
+
         for (const [key, attributes] of Object.entries(parameters)) {
 
             document.querySelector('#slider_' + key).value = attributes.value;
@@ -687,6 +690,8 @@
         for (visual in visuals) {
             context_container.drawImage(canvases[visuals[visual]], 0, 0);
         }
+
+        document.getElementById('cpu_usage').innerHTML = 'Frame render time ' + Math.round(performance.now() - start_time) + 'ms';
 
     }
 
