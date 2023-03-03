@@ -87,7 +87,7 @@
     
     function resetParameters() {
         
-        document.querySelectorAll('.settings_container').remove();
+        document.querySelector('.settings_container').remove();
         var parameters_container = document.createElement('table');
         parameters_container.id = 'parameters_container';
         parameters_container.className = 'settings_container';
@@ -972,7 +972,10 @@
 
         if (document.querySelector('#animate').checked) {
             
-            window.requestAnimationFrame(animateDrawing);
+            setTimeout(() => {
+                window.requestAnimationFrame(animateDrawing);
+            }, Math.round(1000 / config.fps.value));
+            
 
         }
 
@@ -1096,7 +1099,7 @@
     var contexts = {};
 
     const default_config = {
-            'delay':                    {section: "Animation", group: "A", value: 10, descr: 'Delay'},
+            'fps':                      {section: "Animation", group: "A", value: 100, descr: 'FPS'},
             'scale':                    {section: "Animation", group: "A", value: 1, descr: 'Resolution scale'},
             'eco':                      {section: "Animation", group: "A", value: false, descr: 'Do not draw outside the canvas'},
             'x_angle':                  {section: "Angular Functions", group: "A", value: ['cos', 'sin', 'tan'], selected: 'cos', descr: 'Calculate X angle by'},
