@@ -940,7 +940,15 @@
                     if (parameters[key]['type'] == 'float') {
 
                         // get current precision
-                        decimals = (parameters[key]['step'] + "").split('.')[1].length;
+                        if (parameters[key]['step'].includes('.')) {
+
+                            decimals = (parameters[key]['step'] + "").split('.')[1].length;
+
+                        } else {
+
+                            decimals = 0;
+                        
+                        }
 
                         parameters[key]['value'] = (parseFloat(parameters[key]['value']) + parseFloat(parameters[key]['step'])).toFixed(decimals);
 
@@ -962,11 +970,22 @@
                     if (parameters[key]['type'] == 'float') {
 
                         // get current precision
-                        decimals = (parameters[key]['step'] + "").split('.')[1].length;
+                        if (parameters[key]['step'].includes('.')) {
+
+                            decimals = (parameters[key]['step'] + "").split('.')[1].length;
+
+                        } else {
+
+                            decimals = 0;
+                        }
+                        
 
                         parameters[key]['value'] = (parseFloat(parameters[key]['value']) - parseFloat(parameters[key]['step'])).toFixed(decimals);
+                        
                     } else if (parameters[key]['type'] == 'int') {
+
                         parameters[key]['value'] = parseInt(parameters[key]['value']) - parseInt(parameters[key]['step']);
+
                     }
                     
                     // if parameter reached max value, change direction
