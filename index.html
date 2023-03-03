@@ -257,7 +257,7 @@
 
                 container.innerHTML += 
                     '<td><label " for="' + key + '" />' + value.descr + '</label></td>' + 
-                    '<td><input key="' + key + '" type="color" size=3 ' + checked + ' " value="' + value.value + '" id="value_' + key + '" /></td>';
+                    '<td><input key="' + key + '" type="color" size=3 ' + checked + ' " value="' + value.value + '" id="value_' + key + '" /> (<small>' + value.value + '</small>)</td>';
 
             // checkbox
             } else if (value.value === true || value.value === false) {
@@ -579,6 +579,8 @@
         prime_fill_color_rgb = hexToRgb(config.prime_fill_color.value);
         prime_line_color_rgb = hexToRgb(config.prime_outline_color.value);
         
+        rays_line_color_rgb = hexToRgb(config.rays_outline_color.value);
+        
         contexts['dots'].lineWidth = 5;
         contexts['dots'].lineCap = "round";
 
@@ -767,21 +769,25 @@
             if (config.relative_line_width.value == true) {
                 
                 context.lineWidth = parseInt(config.ray_width.value) - parseInt(100 * i / parameters.range.value);
-    
-                if (config.fading_line.value == true) {
-
-                    factor = Math.round((100 - Math.floor(100 * i / parameters.range.value))) / 100
-                    context.strokeStyle = "rgba(" +
-                        Math.floor(prime_line_color_rgb.r) + "," +
-                        Math.floor(prime_line_color_rgb.g) + "," +
-                        Math.floor(prime_line_color_rgb.b) + "," +
-                        parseFloat(1 - factor) + 
-                        ")";
-
-                }
-                    
+                
             }
-            
+
+            if (config.fading_line.value == true) {
+
+                factor = Math.round((100 - Math.floor(100 * i / parameters.range.value))) / 100
+                context.strokeStyle = "rgba(" +
+                    Math.floor(rays_line_color_rgb.r) + "," +
+                    Math.floor(rays_line_color_rgb.g) + "," +
+                    Math.floor(rays_line_color_rgb.b) + "," +
+                    parseFloat(1 - factor) + 
+                    ")";
+
+            } else {
+
+                context.strokeStyle = config.rays_outline_color.value;
+
+            }
+        
             context.beginPath();
 
             if (config.center.value == true) {
@@ -1121,12 +1127,13 @@
             'show_primes_rays':         {section: "Lines", group: "B", value: false, descr: 'Prime rays from the center'},
             'ray_width':                {section: "Lines", group: "B", value: 100, descr: 'Prime rays width'},
             'relative_line_width':      {section: "Lines", group: "C", value: false, descr: 'Prime rays with relative width'},
-            'fading_line':              {section: "Lines", group: "C", value: false, descr: 'Prime rays fade out'},
-            'background_color':         {section: "Colors", group: "A", value: '#abcabc', descr: 'Background color'},
-            'general_outline_color':    {section: "Colors", group: "B", value: '#456456', descr: 'Spiral outline color'},
-            'general_fill_color':       {section: "Colors", group: "B", value: '', descr: 'Spiral lines fill color'},
-            'prime_outline_color':      {section: "Colors", group: "C", value: '#abcabc', descr: 'Arc outline color'},
-            'prime_fill_color':         {section: "Colors", group: "C", value: '#defdef', descr: 'Arc fill color'},
+            'background_color':         {section: "Colors", group: "A", value: '#14173c', descr: 'Background color'},
+            'general_outline_color':    {section: "Colors", group: "B", value: '#525ceb', descr: 'Spiral outline color'},
+            'general_fill_color':       {section: "Colors", group: "B", value: '#1f1f3f', descr: 'Spiral lines fill color'},
+            'rays_outline_color':       {section: "Colors", group: "C", value: '#abcabc', descr: 'Rays from the center'},
+            'fading_line':              {section: "Colors", group: "C", value: false, descr: 'Rays fade out'},
+            'prime_outline_color':      {section: "Colors", group: "D", value: '#abcabc', descr: 'Arc outline color'},
+            'prime_fill_color':         {section: "Colors", group: "D", value: '#defdef', descr: 'Arc fill color'},
             'fading_fill_color':        {section: "Colors", group: "D", value: false, descr: 'Fade out arcs'}
         }
  
