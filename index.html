@@ -924,14 +924,16 @@
 
     function animateDrawing() {
 
-        // used to count the precision of float values to round the result
-        var decimals = 0;
 
         // if in animation mode, loop through all parameters
         for (const [key, attributes] of Object.entries(parameters)) {
 
+            // used to count the precision of float values to round the result
+            var decimals = 0;
+
             // check if the current parameter is set to be animated
-            if (document.querySelector('#animate_' + key).checked) {
+            if (document.querySelector('#animate_' + key).checked &&
+                parameters[key]['step'] != '') {
 
                 // check if the current value needs to be incremented
                 if (parameters[key]['direction'] == 'inc') {
@@ -944,10 +946,6 @@
 
                             decimals = (parameters[key]['step'] + "").split('.')[1].length;
 
-                        } else {
-
-                            decimals = 0;
-                        
                         }
 
                         parameters[key]['value'] = (parseFloat(parameters[key]['value']) + parseFloat(parameters[key]['step'])).toFixed(decimals);
@@ -974,14 +972,11 @@
 
                             decimals = (parameters[key]['step'] + "").split('.')[1].length;
 
-                        } else {
-
-                            decimals = 0;
                         }
                         
 
                         parameters[key]['value'] = (parseFloat(parameters[key]['value']) - parseFloat(parameters[key]['step'])).toFixed(decimals);
-                        
+
                     } else if (parameters[key]['type'] == 'int') {
 
                         parameters[key]['value'] = parseInt(parameters[key]['value']) - parseInt(parameters[key]['step']);
@@ -1160,7 +1155,7 @@
     const default_parameters = {
         range:          {value: 360, min: 90, max: 1440 * 1, step: 1, descr: 'Range', type: 'int', animate: false, direction: 'inc'},
         smoother:       {value: 0.1, min: 0, max: 1, step: 0.0001, descr: 'Density', type: 'float', animate: false, direction: 'inc'},
-        rotation:       {value: 0, min: -90, max: 90, step: 0.1, descr: 'Rotation', type: 'float', animate: false, direction: 'inc'},
+        rotation:       {value: 0, min: -90, max: 90, step: 0.01, descr: 'Rotation', type: 'float', animate: false, direction: 'inc'},
         a:              {value: 100, min: 0, max: 5, step: 0.01, descr: 'Slope', type: 'float', animate: true, direction: 'inc'},
         b:              {value: 5, min: 0, max: 10, step: 0.01, descr: 'Intercept', type: 'float', animate: true, direction: 'inc'},
         pidivisor:      {value: 3.1428, min: 3.1428, max: 360, step: 3.1428, descr: 'divide PI by', type: 'float', animate: false, direction: 'inc'},
