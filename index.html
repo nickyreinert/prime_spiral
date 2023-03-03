@@ -66,7 +66,7 @@
         <input type="checkbox" id="animate" />
         <input type="range" min=25 max=100 step=25 value=75 id="overlay_alpha" onClick="adjustOverlayAlpha();" />
         <a href="https://github.com/nickyreinert/prime_spiral" id="doc" target="_blank">Source & Documentation</a>
-        <p id="cpu_usage"></p>
+        <i id="cpu_usage"></i>
         <table class="settings_container" id="config_container"></table>    
         <table class="settings_container" id="parameters_container"></table>    
     </div>    
@@ -105,7 +105,6 @@
 
         saveSettingsToCookie();
 
-        showControls(); 
         
         registerParameterControls();
         
@@ -178,8 +177,8 @@
         date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
         const expires = "expires=" + date.toUTCString();
 
-        document.cookie = 'config=' + escape(JSON.stringify(window.config)) + '; SameSite=None; Secure; ' + expires;
-        document.cookie = 'parameters=' + escape(JSON.stringify(window.parameters)) + '; SameSite=None; Secure; ' + expires;
+        document.cookie = 'config=' + escape(JSON.stringify(window.config)) + ';' + expires;
+        document.cookie = 'parameters=' + escape(JSON.stringify(window.parameters)) + '; ' + expires;
 
     }
 
@@ -212,7 +211,7 @@
 
     }
 
-    function showControls() {
+    function addControlElements() {
 
         addConfigControls();
 
@@ -400,6 +399,7 @@
         for (const [key, value] of Object.entries(parameters)) {
 
             const controls = ['slider', 'min', 'max', 'step', 'value', 'animate'];
+
             for (const control of controls) {
 
                 let current_control = document.querySelector('#' + control + '_' + key);
@@ -449,7 +449,9 @@
                         
                             // set the global parameter object
                             window.parameters[parameter]['value'] = value;
-                            
+                            // set the value input field
+                            document.querySelector('#value_' + parameter).value = value;
+
                         // if not the slider, then it's the value, min, max or step value
                         // which also impacts the slider
                         } else {
@@ -469,7 +471,7 @@
                         }
                         saveSettingsToCookie();
 
-                        drawSpiral();
+                        controlAnimation();
 
                    })
 
@@ -483,8 +485,10 @@
     function listenToScreenSizeChanges() {
       
         window.addEventListener("resize", function() {
-        fitElementToScreen(document.getElementById('container'));
-        drawSpiral(parameters);
+            
+            resizeCanvases();
+
+            draw(parameters);
 
       });
 
@@ -506,6 +510,7 @@
 
         return true;
     }
+   
     function hexToRgb(hex) {
         // thanks to https://stackoverflow.com/a/5624139/2360229
         // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
@@ -520,15 +525,6 @@
             g: parseInt(result[2], 16),
             b: parseInt(result[3], 16)
         } : null;
-    }
-
-    function fitElementToScreen(element) {
-
-        var screenWidth = window.innerWidth;
-        var screenHeight = window.innerHeight;
-
-        element.style.width = screenWidth + "px";
-        element.style.height = screenHeight + "px";
     }
 
     // function enableAudio() {
@@ -549,47 +545,19 @@
 
     // }
 
-    function drawSpiral() {
+    function draw() {
                 
         var start_time = performance.now();
-
-        for (const [key, attributes] of Object.entries(parameters)) {
-
-            document.querySelector('#slider_' + key).value = attributes.value;
-            document.querySelector('#value_' + key).value = attributes.value;
-
-        }
-
-        // init main canvas container
+    
         var screenWidth = window.innerWidth;
         var screenHeight = window.innerHeight;
 
-        var canvas_container = document.getElementById('canvas');
-        var context_container = canvas_container.getContext('2d');
-
-        canvas_container.style.width = screenWidth + 'px';
-        canvas_container.style.height = screenHeight + 'px';
-        canvas_container.width = screenWidth * parseInt(config.scale.value);
-        canvas_container.height = screenHeight * parseInt(config.scale.value);
-        context_container.clearRect(0, 0, screenWidth, screenHeight);
-
-        // init additional canvas layers
-        var canvases = {};
-        var contexts = {};
-        var visuals = ['lines', 'rays', 'dots'];
-
         for (visual in visuals) {
-                
-            canvases[visuals[visual]] = document.createElement('canvas');
-            contexts[visuals[visual]] = canvases[visuals[visual]].getContext('2d');
-
-            canvases[visuals[visual]].width = screenWidth * parseInt(config.scale.value);
-            canvases[visuals[visual]].height = screenHeight * parseInt(config.scale.value);
-
+            
             contexts[visuals[visual]].clearRect(0, 0, screenWidth, screenHeight);
-
+    
         }
-
+    
         // context_dots.globalAlpha = 0.5;
 
         num = 2;
@@ -678,6 +646,13 @@
 
         }
 
+        // for (r = 0; r < 1; r++) {
+        
+        //     // r = raindrop index
+        //     drawRainDrop(r, contexts['raindrops']);
+
+        // }       
+
         if (config.general_fill_color.value.includes('#')) {
             contexts['lines'].fillStyle = config.general_fill_color.value;
             contexts['lines'].fill();
@@ -687,11 +662,28 @@
             contexts['lines'].stroke();
         }
 
-        for (visual in visuals) {
-            context_container.drawImage(canvases[visuals[visual]], 0, 0);
-        }
+        reDrawContexts();
 
         document.getElementById('cpu_usage').innerHTML = 'Frame render time ' + Math.round(performance.now() - start_time) + 'ms';
+
+    }
+
+    function reDrawContexts() {
+
+        var screenWidth = window.innerWidth;
+        var screenHeight = window.innerHeight;
+
+        var canvas_container = document.getElementById('canvas');
+
+        var context_container = canvas_container.getContext('2d', { alpha: true});
+
+        context_container.clearRect(0, 0, screenWidth, screenHeight);
+
+        for (visual in visuals) {
+            
+            context_container.drawImage(canvases[visuals[visual]], 0, 0);
+            
+        }
 
     }
 
@@ -749,7 +741,9 @@
 
         y = centery + (distortion * ((slope + intercept * angle) + diam) * y_angle);
 
-        return {x: x, y: y};
+        // floor coordinates to integers to improve performance according to https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas?retiredLocale=de
+        // return {x: x, y: y};
+        return {x: Math.floor(x), y: Math.floor(y)};
 
     }
 
@@ -798,6 +792,35 @@
 
     }
     
+    // function drawRainDrop(rainDropIndex, context) {
+
+    //     if (typeof(rain_drops[rainDropIndex]) == 'undefined') {
+            
+    //         x = Math.floor(Math.random() * window.innerWidth);
+    //         y = Math.floor(Math.random() * window.innerHeight);
+
+    //         rain_drops[rainDropIndex] = {};
+
+    //         rain_drops[rainDropIndex].x = x;
+    //         rain_drops[rainDropIndex].y = y;
+    //         rain_drops[rainDropIndex].r = 1;
+
+    //     } else {
+
+    //         x = rain_drops[rainDropIndex].x;
+    //         y = rain_drops[rainDropIndex].y;
+    //         r = rain_drops[rainDropIndex].r * 1.1;
+    //         rain_drops[rainDropIndex].r = r;
+
+    //     }
+
+    //     context.arc(x, y, r, 0, 2 * Math.PI);
+    //     context.stroke();
+    //     console.log('------');
+    //     console.log(rain_drops);
+
+    // }
+
     function drawArcs(x, y, context_dots, num) {
 
         context_dots.beginPath();
@@ -869,8 +892,7 @@
 
         if (window.animated_parameters <= 0) {window.animation = false}
 
-        drawSpiral();
-
+        draw();
         if (typeof(loop) != 'undefined') {
                         
             window.clearInterval(loop);
@@ -879,6 +901,7 @@
 
         if (window.animation == true) {
             
+            // TODO: https://blog.webdevsimplified.com/2021-12/request-animation-frame/
             loop = setInterval(animateDrawing, parseInt(document.querySelector('#value_delay').value));
 
         }
@@ -913,7 +936,9 @@
                     
                     // if parameter reached max value, change direction
                     if (parameters[key]['value'] > parameters[key]['max']) {
+
                         parameters[key]['direction'] = 'dec';
+
                     }
                 
                 // check if the current value needs to be incremented
@@ -935,12 +960,16 @@
                         parameters[key]['direction'] = 'inc';
                     }
                 }
+                            
+                // update the slider and the input field
+                document.querySelector('#slider_' + key).value = parameters[key]['value'];
+                document.querySelector('#value_' + key).value = parameters[key]['value'];
 
             }
             
         }
         
-        drawSpiral();
+        draw();
 
     }
 
@@ -1008,11 +1037,58 @@
 
     }
 
+    function createCanvasesAndContexts() {
+
+        var canvas_container = document.getElementById('canvas');
+
+        var context_container = canvas_container.getContext('2d', { alpha: true});
+
+        for (visual in visuals) {
+            
+            canvases[visuals[visual]] = document.createElement('canvas');
+            contexts[visuals[visual]] = canvases[visuals[visual]].getContext('2d');
+            
+        }
+
+    }
+
+    function resizeCanvases() {
+
+        var screenWidth = window.innerWidth;
+        var screenHeight = window.innerHeight;
+
+        document.getElementById('container').style.width = screenWidth + "px";
+        document.getElementById('container').style.height = screenHeight + "px";
+
+        var canvas_container = document.getElementById('canvas');
+
+        canvas_container.style.width = screenWidth + 'px';
+        canvas_container.style.height = screenHeight + 'px';
+        canvas_container.width = screenWidth * parseInt(config.scale.value);
+        canvas_container.height = screenHeight * parseInt(config.scale.value);
+
+        for (visual in visuals) {
+            
+            canvases[visuals[visual]].width = screenWidth * parseInt(config.scale.value);
+            canvases[visuals[visual]].height = screenHeight * parseInt(config.scale.value);
+
+        }
+
+    }
+
     var primes = [];
+
+    var rain_drops = {};
 
     const animation = true;
     
     var animated_parameters = 0;
+
+    // don't touch this, it's just a list representing the canvases
+    var visuals = ['lines', 'rays', 'dots'];
+    // init additional canvas layers
+    var canvases = {};
+    var contexts = {};
 
     const default_config = {
             'delay':                    {section: "Animation", group: "A", value: 10, descr: 'Delay'},
@@ -1068,19 +1144,20 @@
 
     } 
 
-    showControls();
+    addControlElements();
     
     registerAnimationControlParameters();
 
     registerParameterControls();
 
-    controlAnimation();
+
+    createCanvasesAndContexts();
+
+    resizeCanvases();
+
+    draw();
 
     listenToScreenSizeChanges();
-
-    fitElementToScreen(document.getElementById('container'));
-
-    drawSpiral();
 
     </script>
 </body>
