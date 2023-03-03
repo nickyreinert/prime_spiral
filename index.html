@@ -252,8 +252,15 @@
                 
             }
             
+            // color picker
+            if (('' + value.value).charAt(0) == '#') {
+
+                container.innerHTML += 
+                    '<td><label " for="' + key + '" />' + value.descr + '</label></td>' + 
+                    '<td><input key="' + key + '" type="color" size=3 ' + checked + ' " value="' + value.value + '" id="value_' + key + '" /></td>';
+
             // checkbox
-            if (value.value === true || value.value === false) {
+            } else if (value.value === true || value.value === false) {
                 
                 if (value.value == true) {var checked = 'checked'} else {var checked = ''};
 
