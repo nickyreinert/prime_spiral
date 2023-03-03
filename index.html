@@ -363,7 +363,7 @@
                     
                     saveSettingsToCookie();
 
-                    controlAnimation();
+                    draw();
 
                 }
 
@@ -380,7 +380,7 @@
                         
                         saveSettingsToCookie();
 
-                        controlAnimation();
+                        draw();
                         
                     }
                 }
@@ -396,7 +396,7 @@
 
                     saveSettingsToCookie();
 
-                    controlAnimation();
+                    draw();
 
                 })
             
@@ -436,7 +436,7 @@
 
                         saveSettingsToCookie();
 
-                        controlAnimation();
+                        draw();
 
                     }
 
@@ -479,7 +479,7 @@
                         }
                         saveSettingsToCookie();
 
-                        controlAnimation();
+                        draw();
 
                    })
 
@@ -683,10 +683,12 @@
 
         var canvas_container = document.getElementById('canvas');
 
-        var context_container = canvas_container.getContext('2d', { alpha: true});
+        var context_container = canvas_container.getContext('2d', { alpha: false});
 
-        context_container.clearRect(0, 0, screenWidth, screenHeight);
-
+        context_container.fillStyle = window.config.background_color.value;
+        // context_container.clearRect(0, 0, screenWidth, screenHeight);
+        context_container.fillRect(0, 0, canvas_container.width, canvas_container.height);
+        
         for (visual in visuals) {
             
             context_container.drawImage(canvases[visuals[visual]], 0, 0);
@@ -1054,10 +1056,6 @@
 
     function createCanvasesAndContexts() {
 
-        var canvas_container = document.getElementById('canvas');
-
-        var context_container = canvas_container.getContext('2d', { alpha: true});
-
         for (visual in visuals) {
             
             canvases[visuals[visual]] = document.createElement('canvas');
@@ -1124,11 +1122,12 @@
             'ray_width':                {section: "Lines", group: "B", value: 100, descr: 'Prime rays width'},
             'relative_line_width':      {section: "Lines", group: "C", value: false, descr: 'Prime rays with relative width'},
             'fading_line':              {section: "Lines", group: "C", value: false, descr: 'Prime rays fade out'},
-            'prime_outline_color':      {section: "Colors", group: "A", value: '#abcabc', descr: 'Prime arc outline color'},
-            'prime_fill_color':         {section: "Colors", group: "A", value: '#defdef', descr: 'Prime arc fill color'},
-            'general_outline_color':    {section: "Colors", group: "B", value: '#456456', descr: 'General outline color'},
-            'general_fill_color':       {section: "Colors", group: "B", value: '', descr: 'General fill color'},
-            'fading_fill_color':        {section: "Colors", group: "C", value: false, descr: 'Fade out arcs'}
+            'background_color':         {section: "Colors", group: "A", value: '#abcabc', descr: 'Background color'},
+            'general_outline_color':    {section: "Colors", group: "B", value: '#456456', descr: 'Spiral outline color'},
+            'general_fill_color':       {section: "Colors", group: "B", value: '', descr: 'Spiral lines fill color'},
+            'prime_outline_color':      {section: "Colors", group: "C", value: '#abcabc', descr: 'Arc outline color'},
+            'prime_fill_color':         {section: "Colors", group: "C", value: '#defdef', descr: 'Arc fill color'},
+            'fading_fill_color':        {section: "Colors", group: "D", value: false, descr: 'Fade out arcs'}
         }
  
     // heads up, please do not use underscores for the attributes
@@ -1164,7 +1163,6 @@
     registerAnimationControlParameters();
 
     registerParameterControls();
-
 
     createCanvasesAndContexts();
 
