@@ -665,7 +665,7 @@
 
         reDrawContexts();
 
-        document.getElementById('cpu_usage').innerHTML = 'Frame render time ' + Math.round(performance.now() - start_time) + 'ms';
+        document.getElementById('cpu_usage').innerHTML = Math.round(1 / ((performance.now() - start_time) / 1000 ))+ ' FPS';
 
     }
 
@@ -900,8 +900,6 @@
         draw();
 
         if (window.animation == true) {
-
-            // loop = setInterval(animateDrawing, parseInt(document.querySelector('#value_delay').value));
 
             loop = window.requestAnimationFrame(animateDrawing); 
 
