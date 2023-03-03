@@ -105,6 +105,7 @@
 
         saveSettingsToCookie();
 
+        addControlElements(); 
         
         registerParameterControls();
         
@@ -888,23 +889,23 @@
 
     function controlAnimation() {
         
-        if (document.querySelector('#animate').checked) {window.animation = true}
-
-        if (window.animated_parameters <= 0) {window.animation = false}
-
-        draw();
-        if (typeof(loop) != 'undefined') {
-                        
-            window.clearInterval(loop);
-
+        if (document.querySelector('#animate').checked || 
+            window.animated_parameters > 0
+        ) {
+            window.animation = true
+        
         }
+
+        // always draw at least one time
+        draw();
 
         if (window.animation == true) {
-            
-            // TODO: https://blog.webdevsimplified.com/2021-12/request-animation-frame/
-            loop = setInterval(animateDrawing, parseInt(document.querySelector('#value_delay').value));
 
-        }
+            // loop = setInterval(animateDrawing, parseInt(document.querySelector('#value_delay').value));
+
+            loop = window.requestAnimationFrame(animateDrawing); 
+
+        } 
 
     }
 
@@ -970,6 +971,12 @@
         }
         
         draw();
+
+        if (document.querySelector('#animate').checked) {
+            
+            window.requestAnimationFrame(animateDrawing);
+
+        }
 
     }
 
