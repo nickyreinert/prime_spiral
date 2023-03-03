@@ -928,25 +928,23 @@
         // if in animation mode, loop through all parameters
         for (const [key, attributes] of Object.entries(parameters)) {
 
-            // used to count the precision of float values to round the result
-            var decimals = 0;
-
             // check if the current parameter is set to be animated
             if (document.querySelector('#animate_' + key).checked &&
                 parameters[key]['step'] != '') {
+
+                // get current precision
+                var decimals = 0;
+                if (('' + parameters[key]['step']).includes('.')) {
+
+                decimals = (parameters[key]['step'] + "").split('.')[1].length;
+
+                }
 
                 // check if the current value needs to be incremented
                 if (parameters[key]['direction'] == 'inc') {
 
                     // check if the current value is a float or an integer
                     if (parameters[key]['type'] == 'float') {
-
-                        // get current precision
-                        if (parameters[key]['step'].includes('.')) {
-
-                            decimals = (parameters[key]['step'] + "").split('.')[1].length;
-
-                        }
 
                         parameters[key]['value'] = (parseFloat(parameters[key]['value']) + parseFloat(parameters[key]['step'])).toFixed(decimals);
 
@@ -967,13 +965,6 @@
                     // check if the current value is a float or an integer
                     if (parameters[key]['type'] == 'float') {
 
-                        // get current precision
-                        if (parameters[key]['step'].includes('.')) {
-
-                            decimals = (parameters[key]['step'] + "").split('.')[1].length;
-
-                        }
-                        
 
                         parameters[key]['value'] = (parseFloat(parameters[key]['value']) - parseFloat(parameters[key]['step'])).toFixed(decimals);
 
