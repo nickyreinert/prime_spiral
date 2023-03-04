@@ -53,6 +53,9 @@
         background-color: #fff;
       }
 
+      #animate_button{
+        background-color: #bfb;
+      }
     </style>
   </head>
   <body>
@@ -61,11 +64,11 @@
         <!-- <input type="button" id="audio" value="audio" onClick="enableAudio();" /> -->
         <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
         <input type="button" id="export" value="Export" onClick="exportParameters();" />
-        <input type="button" id="hide" value="Hide (Enter)" onClick="showHideControls();" />
-        <label for="animate">Animate (Esc)</label>
-        <input type="checkbox" id="animate" />
-        <input type="range" min=25 max=100 step=25 value=75 id="overlay_alpha" onClick="adjustOverlayAlpha();" />
-        <a href="https://github.com/nickyreinert/prime_spiral" id="doc" target="_blank">Source & Documentation</a>
+        <input type="button" id="hide" value="Hide (Escape)" onClick="showHideControls();" />
+        <input type="button" id="animate_button" value="Start Animation (Enter)"/>
+        <input hidden type="checkbox" id="animate" />
+        <input type="range" min=1 max=100 step=1 value=75 id="overlay_alpha" onInput="adjustOverlayAlpha();" />
+        <a href="https://github.com/nickyreinert/prime_spiral" id="doc" target="_blank"> Source & Documentation</a>
         <i id="cpu_usage"></i>
         <table class="settings_container" id="config_container"></table>    
         <table class="settings_container" id="parameters_container"></table>    
@@ -674,7 +677,7 @@
 
         reDrawContexts();
 
-        document.getElementById('cpu_usage').innerHTML = Math.round(1 / ((performance.now() - start_time) / 1000 ))+ ' FPS';
+        document.getElementById('cpu_usage').innerHTML = ' | ' + Math.round(1 / ((performance.now() - start_time) / 1000 ))+ ' fps';
 
     }
 
@@ -905,8 +908,11 @@
     function controlAnimation() {
         
         if (document.querySelector('#animate').checked || 
+
             window.animated_parameters > 0
+
         ) {
+
             window.animation = true
         
         }
@@ -993,7 +999,9 @@
         if (document.querySelector('#animate').checked) {
             
             setTimeout(() => {
+
                 window.requestAnimationFrame(animateDrawing);
+
             }, Math.round(1000 / config.fps.value));
             
 
@@ -1022,18 +1030,27 @@
 
     function registerAnimationControlParameters() {
         
-        let animate = document.querySelector('#animate');
+        
+        let animate_button = document.querySelector('#animate_button');
 
-        animate.onclick = function(event) {
+        animate_button.onclick = function(event) {
+            
+            let animate = document.querySelector('#animate');
 
-            if (event.target.checked) {
-                
-                window.animation = true;
+            animate.checked = !animate.checked;
+
+            window.animation = animate.checked;
+
+            if (window.animation == true) {
+
+                event.target.value = 'Stop Animation (Enter)';
+                event.target.style.backgroundColor = '#fbb';
 
             } else {
-
-                window.animation = false;
-
+                
+                event.target.value = 'Start Animation (Enter)';
+                event.target.style.backgroundColor = '#bfb';
+            
             }
 
             controlAnimation();
@@ -1042,19 +1059,35 @@
 
         document.addEventListener('keydown', function(event) {
 
-        if (event.key == 'Enter') {
+        if (event.key == 'Escape') {
 
             showHideControls();
 
         }
 
-        if (event.key == 'Escape') {
+        if (event.key == 'Enter') {
 
             window.animation = !window.animation;
 
             let animate = document.querySelector('#animate');
             
             animate.checked = !animate.checked;
+
+            window.animation = animate.checked;
+
+            let animate_button = document.querySelector('#animate_button');
+
+            if (window.animation == true) {
+
+                animate_button.value = 'Stop Animation (Enter)';
+                animate_button.style.backgroundColor = '#fbb';
+
+            } else {
+
+                animate_button.value = 'Start Animation (Enter)';
+                animate_button.style.backgroundColor = '#bfb';
+
+            }
 
             controlAnimation();
 
