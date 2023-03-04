@@ -53,7 +53,7 @@
         background-color: #fff;
       }
 
-      #animate_button{
+      #animate_button, #record{
         background-color: #bfb;
       }
     </style>
@@ -103,7 +103,7 @@
             recording_button.style.backgroundColor = '#fbb';
 
             var canvas_container = document.getElementById('canvas');
-            const stream = canvas_container.captureStream(25);
+            const stream = canvas_container.captureStream(60);
             window.mediaRecorder = new MediaRecorder(stream, {
                         mimeType: 'video/webm;codecs=h264,opus',
                         ignoreMutedMedia: true
@@ -126,7 +126,7 @@
             }
 
             recording_button.value = 'Start recording (r)';
-            recording_button.style.backgroundColor = '';
+            recording_button.style.backgroundColor = '#bfb';
 
             console.log(window.recordedChunks)
             window.mediaRecorder.stop();
