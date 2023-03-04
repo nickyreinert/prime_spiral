@@ -63,6 +63,8 @@
     <div id="controller_container" class="controller_container">
         <!-- <input type="button" id="audio" value="audio" onClick="enableAudio();" /> -->
         <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
+        <input type="button" id="record" value="Start recording (r)" onClick="recordAnimation();" />
+        <input type="checkbox" hidden id="recording_status" />
         <input type="button" id="export" value="Export" onClick="exportParameters();" />
         <input type="button" id="hide" value="Hide (Escape)" onClick="showHideControls();" />
         <input type="button" id="animate_button" value="Start Animation (Enter)"/>
@@ -79,6 +81,69 @@
     </div>
 
     <script>
+
+    function recordAnimation() {
+
+        let recording_button = document.querySelector('#record');
+
+        let recording_status = document.querySelector('#recording_status');
+
+        recording_status.checked = !recording_status.checked;
+
+        if (recording_status.checked === true) {
+
+            if (window.animation === false) {
+                
+                let animate_button = document.querySelector('#animate_button');
+                animate_button.click();
+
+            }
+
+            recording_button.value = 'Stop recording (r)';
+            recording_button.style.backgroundColor = '#fbb';
+
+            var canvas_container = document.getElementById('canvas');
+            const stream = canvas_container.captureStream(25);
+            window.mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: 'video/webm;codecs=h264,opus',
+                        ignoreMutedMedia: true
+                });
+            window.recordedChunks = [];
+            window.mediaRecorder.ondataavailable = e => {
+                            if(e.data.size > 0){
+                                    recordedChunks.push(e.data);
+                                }
+                            };
+            window.mediaRecorder.start();
+                        
+        } else {
+
+            if (window.animation === true) {
+                
+                let animate_button = document.querySelector('#animate_button');
+                animate_button.click();
+
+            }
+
+            recording_button.value = 'Start recording (r)';
+            recording_button.style.backgroundColor = '';
+
+            console.log(window.recordedChunks)
+            window.mediaRecorder.stop();
+            setTimeout(() => {
+                const blob = new Blob(window.recordedChunks, {
+                    type: "video/webm"
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "recording.webm";
+                a.click();
+                URL.revokeObjectURL(url);
+            },0);
+
+        }
+    }
 
     function adjustOverlayAlpha() {
 
@@ -1011,7 +1076,7 @@
 
     function showHideControls() {
 
-        let settings_container = document.querySelectorAll('.settings_container');
+        let settings_container = document.querySelectorAll('.controller_container');
 
         settings_container.forEach(function(element) {
             if (element.style.display == 'none') {
@@ -1058,6 +1123,12 @@
         }
 
         document.addEventListener('keydown', function(event) {
+
+        if (event.key == 'r') {
+
+            recordAnimation();
+
+        }
 
         if (event.key == 'Escape') {
 
@@ -1136,10 +1207,10 @@
     var primes = [];
 
     var rain_drops = {};
-
-    const animation = true;
     
     var animated_parameters = 0;
+
+    var animation = false;
 
     // don't touch this, it's just a list representing the canvases
     var visuals = ['lines', 'rays', 'dots'];
