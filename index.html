@@ -41,6 +41,7 @@
 
         margin: 10px;
         margin-bottom: 30px;
+        margin-top: 30px;
         
       }
 
@@ -56,22 +57,31 @@
       #animate_button, #record{
         background-color: #bfb;
       }
+
+      #top {
+        position: fixed;
+        background-color: #fff;
+      }
     </style>
   </head>
   <body>
     
     <div id="controller_container" class="controller_container">
-        <!-- <input type="button" id="audio" value="audio" onClick="enableAudio();" /> -->
-        <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
-        <input type="button" id="record" value="Start recording (s)" onClick="recordAnimation();" />
-        <input type="checkbox" hidden id="recording_status" />
-        <input type="button" id="export" value="Export" onClick="exportParameters();" />
-        <input type="button" id="hide" value="Hide (Escape)" onClick="showHideControls();" />
-        <input type="button" id="animate_button" value="Start Animation (Enter)"/>
-        <input hidden type="checkbox" id="animate" />
-        <input type="range" min=1 max=100 step=1 value=75 id="overlay_alpha" onInput="adjustOverlayAlpha();" />
-        <a href="https://github.com/nickyreinert/prime_spiral" id="doc" target="_blank"> Source & Documentation</a>
-        <i id="cpu_usage"></i>
+        <div id="top">
+
+            <!-- <input type="button" id="audio" value="audio" onClick="enableAudio();" /> -->
+            <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
+            <input type="button" id="record" value="Start recording (s)" onClick="recordAnimation();" />
+            <input type="checkbox" hidden id="recording_status" />
+            <input type="button" id="export" value="Export" onClick="exportParameters();" />
+            <input type="button" id="hide" value="Hide (Escape)" onClick="showHideControls();" />
+            <input type="button" id="animate_button" value="Start Animation (Enter)"/>
+            <input hidden type="checkbox" id="animate" />
+            <label for="overlay_alpha">Alpha (-/+)</label>
+            <input type="range" min=1 max=100 step=1 value=75 id="overlay_alpha" onInput="adjustOverlayAlpha();" />
+            <a href="https://github.com/nickyreinert/prime_spiral" id="doc" target="_blank"> Source & Documentation</a>
+            <i id="cpu_usage"></i>
+        </div>
         <table class="settings_container" id="config_container"></table>    
         <table class="settings_container" id="parameters_container"></table>    
     </div>    
@@ -769,7 +779,7 @@
 
         reDrawContexts();
 
-        document.getElementById('cpu_usage').innerHTML = ' | ' + Math.round(1 / ((performance.now() - start_time) / 1000 ))+ ' fps';
+        document.getElementById('cpu_usage').innerHTML = Math.round(1 / ((performance.now() - start_time) / 1000 ))+ ' fps';
 
     }
 
@@ -1169,7 +1179,7 @@
         if (event.key == '-') {
 
             if (parseInt(document.querySelector('#overlay_alpha').value) > parseInt(document.querySelector('#overlay_alpha').min)) {
-                document.querySelector('#overlay_alpha').value -= parseInt(document.querySelector('#overlay_alpha').value) - 10;;
+                document.querySelector('#overlay_alpha').value = parseInt(document.querySelector('#overlay_alpha').value) - 10;
                 adjustOverlayAlpha();
             }
 
