@@ -63,7 +63,7 @@
     <div id="controller_container" class="controller_container">
         <!-- <input type="button" id="audio" value="audio" onClick="enableAudio();" /> -->
         <input type="button" id="reset" value="Reset" onClick="resetParameters();" />
-        <input type="button" id="record" value="Start recording (r)" onClick="recordAnimation();" />
+        <input type="button" id="record" value="Start recording (s)" onClick="recordAnimation();" />
         <input type="checkbox" hidden id="recording_status" />
         <input type="button" id="export" value="Export" onClick="exportParameters();" />
         <input type="button" id="hide" value="Hide (Escape)" onClick="showHideControls();" />
@@ -100,7 +100,7 @@
 
             }
 
-            recording_button.value = 'Stop recording (r)';
+            recording_button.value = 'Stop recording (s)';
             recording_button.style.backgroundColor = '#fbb';
 
             var canvas_container = document.getElementById('canvas');
@@ -127,7 +127,7 @@
 
             }
 
-            recording_button.value = 'Start recording (r)';
+            recording_button.value = 'Start recording (s)';
             recording_button.style.backgroundColor = '#bfb';
 
             console.log(window.recordedChunks)
@@ -605,20 +605,45 @@
         } : null;
     }
 
-    // function enableAudio() {
-  
-    //     console.log('enable audio');
-    //     var context = new AudioContext();
-    //     o = context.createOscillator()
-    //     g = context.createGain()
-    //     o.type = 'triangle';
-    //     o.connect(g)
-    //     o.frequency.value = 87.31;
-    //     g.connect(context.destination)
-    //     o.start(0)
 
-    //     g.gain.exponentialRampToValueAtTime(
-    //         0.00001, context.currentTime + 1
+    // function createOscillator(context, gain, type, frequency) {
+
+    //     oscillator = context.createOscillator();
+    //     oscillator.type = type; // square triangle sine
+    //     oscillator.frequency.value = frequency;
+    //     oscillator.connect(gain);
+
+    //     return oscillator
+    // }
+
+    // function playOscillators() {
+  
+    //     var effects = [
+    //         {
+    //             type: 'triangle',
+    //             freq: 87.31,
+    //             time: 0
+    //         }
+    //     ]
+
+    //     var context = new (window.AudioContext || window.webkitAudioContext)();
+    //     gain = context.createGain()
+        
+    //     oscillators = []
+
+    //     for (effect in effects) {
+
+    //         oscillators.push(createOscillator(context, gain, effects[effect].type, effects[effect].freq))
+    //     }
+
+    //     gain.connect(context.destination)
+
+    //     for (oscillator in oscillators) {
+    //         oscillators[oscillator].start(effects[oscillator].time);
+    //     }
+
+    //     gain.gain.exponentialRampToValueAtTime(
+    //         0.1, context.currentTime + 5
     //     )
 
     // }
@@ -1126,9 +1151,27 @@
 
         document.addEventListener('keydown', function(event) {
 
-        if (event.key == 'r') {
+        if (event.key == 's') {
 
             recordAnimation();
+
+        }
+
+        if (event.key == '+') {
+
+            if (parseInt(document.querySelector('#overlay_alpha').value) < parseInt(document.querySelector('#overlay_alpha').max)) {
+                document.querySelector('#overlay_alpha').value = parseInt(document.querySelector('#overlay_alpha').value) + 10;
+                adjustOverlayAlpha();
+            }
+
+        }
+
+        if (event.key == '-') {
+
+            if (parseInt(document.querySelector('#overlay_alpha').value) > parseInt(document.querySelector('#overlay_alpha').min)) {
+                document.querySelector('#overlay_alpha').value -= parseInt(document.querySelector('#overlay_alpha').value) - 10;;
+                adjustOverlayAlpha();
+            }
 
         }
 
