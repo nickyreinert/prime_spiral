@@ -476,8 +476,14 @@
 
                     saveSettingsToCookie();
 
+                    // when user changes resolution, we also need to resize canvas
+                    if (current_key == 'scale') {
+                        
+                        resizeCanvases();
+                        
+                    }
+                    
                     draw();
-
                 })
             
             }
@@ -1287,18 +1293,18 @@
             'show_number_arcs':         {section: "Arcs", group: "A", value: false, descr: 'Show arcs around non-primes'},
             'show_primes_arcs':         {section: "Arcs", group: "A", value: true, descr: 'Show arcs around prime numbers'},
             'scale_diameter':           {section: "Arcs", group: "B", value: false, descr: 'Scale arc diameter'},
+            'fading_fill_color':        {section: "Arcs", group: "B", value: false, descr: 'Fade out arcs'},
             'show_beziers':             {section: "Lines", group: "A", value: false, descr: 'Use bezier curves'},
             'show_primes_rays':         {section: "Lines", group: "B", value: false, descr: 'Prime rays from the center'},
             'ray_width':                {section: "Lines", group: "B", value: 100, descr: 'Prime rays width'},
             'relative_line_width':      {section: "Lines", group: "C", value: false, descr: 'Prime rays with relative width'},
+            'fading_line':              {section: "Lines", group: "C", value: false, descr: 'Rays fade out'},
             'background_color':         {section: "Colors", group: "A", value: '#14173c', descr: 'Background color'},
             'general_outline_color':    {section: "Colors", group: "B", value: '#525ceb', descr: 'Spiral outline color'},
             'general_fill_color':       {section: "Colors", group: "B", value: '#1f1f3f', descr: 'Spiral lines fill color'},
             'rays_outline_color':       {section: "Colors", group: "C", value: '#abcabc', descr: 'Rays from the center'},
-            'fading_line':              {section: "Colors", group: "C", value: false, descr: 'Rays fade out'},
             'prime_outline_color':      {section: "Colors", group: "D", value: '#abcabc', descr: 'Arc outline color'},
-            'prime_fill_color':         {section: "Colors", group: "D", value: '#defdef', descr: 'Arc fill color'},
-            'fading_fill_color':        {section: "Colors", group: "D", value: false, descr: 'Fade out arcs'}
+            'prime_fill_color':         {section: "Colors", group: "D", value: '#defdef', descr: 'Arc fill color'}
         }
  
     // heads up, please do not use underscores for the attributes
