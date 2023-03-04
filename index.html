@@ -477,7 +477,7 @@
                     saveSettingsToCookie();
 
                     // when user changes resolution, we also need to resize canvas
-                    if (current_key == 'scale') {
+                    if (current_key == 'scale' && parseInt(event.target.value) > 0) {
                         
                         resizeCanvases();
                         
